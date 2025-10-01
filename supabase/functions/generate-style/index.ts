@@ -78,8 +78,11 @@ serve(async (req) => {
       throw new Error("No content in AI response");
     }
 
+    // Strip markdown code fences if present
+    const cleanContent = content.replace(/^```json\n?/i, '').replace(/\n?```$/i, '').trim();
+    
     // Parse the JSON response
-    const styleData = JSON.parse(content);
+    const styleData = JSON.parse(cleanContent);
 
     return new Response(JSON.stringify(styleData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

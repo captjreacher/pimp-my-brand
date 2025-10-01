@@ -81,7 +81,10 @@ Return JSON:
       throw new Error("No content in AI response");
     }
 
-    const visualData = JSON.parse(content);
+    // Strip markdown code fences if present
+    const cleanContent = content.replace(/^```json\n?/i, '').replace(/\n?```$/i, '').trim();
+
+    const visualData = JSON.parse(cleanContent);
 
     return new Response(JSON.stringify(visualData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
