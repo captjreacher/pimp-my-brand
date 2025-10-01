@@ -8,10 +8,12 @@ interface GenerateStepProps {
   corpus: string;
   uploadIds: string[];
   format: string;
+  logoUrl?: string | null;
   onComplete: (brandId: string) => void;
+  onBrandDataGenerated?: (data: any) => void;
 }
 
-export function GenerateStep({ corpus, uploadIds, format, onComplete }: GenerateStepProps) {
+export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, onBrandDataGenerated }: GenerateStepProps) {
   const [generating, setGenerating] = useState(false);
   const [stage, setStage] = useState<string>("");
 
@@ -47,6 +49,11 @@ export function GenerateStep({ corpus, uploadIds, format, onComplete }: Generate
       if (visualRes.error) throw visualRes.error;
       const visualData = visualRes.data;
 
+      // Notify parent of brand data for logo step
+      if (onBrandDataGenerated) {
+        onBrandDataGenerated({ ...styleData, ...visualData });
+      }
+
       // Stage 3: Brand Rider assembly
       setStage("Assembling your Brand Rider...");
       const riderRes = await supabase.functions.invoke("generate-brand-rider", {
@@ -72,6 +79,7 @@ export function GenerateStep({ corpus, uploadIds, format, onComplete }: Generate
           color_palette: visualData.palette,
           fonts: visualData.fonts,
           format_preset: format,
+          logo_url: logoUrl,
           raw_context: { uploadIds, markdown },
         })
         .select()
