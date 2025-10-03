@@ -316,6 +316,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_share_by_token: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          kind: string
+          target_id: string
+          token: string
+          user_id: string
+        }[]
+      }
       get_user_tier: {
         Args: { user_id_param: string }
         Returns: Database["public"]["Enums"]["subscription_tier"]
