@@ -23,15 +23,63 @@ interface BrandTemplateRendererProps {
 
 export const BrandTemplateRenderer = forwardRef<HTMLDivElement, BrandTemplateRendererProps>(
   ({ brand, markdown }, ref) => {
-    const TemplateComponent = brand?.format_preset ? templateComponents[brand.format_preset] : undefined;
+    const parsedRawContext = (() => {
+      if (!brand?.raw_context) return null;
+      if (typeof brand.raw_context === "string") {
+        try {
+          const parsed = JSON.parse(brand.raw_context);
+          return parsed && typeof parsed === "object" ? parsed : null;
+        } catch (error) {
+          console.warn("Failed to parse brand raw_context", error);
+          return null;
+        }
+      }
+      if (typeof brand.raw_context === "object") {
+        return brand.raw_context as Record<string, unknown>;
+      }
+      return null;
+    })();
+
+    const resolveFormatPreset = () => {
+      const preset =
+        brand?.format_preset ||
+        (parsedRawContext?.format_preset as string | undefined) ||
+        (parsedRawContext?.format as string | undefined);
+
+      return typeof preset === "string" ? preset.toLowerCase() : undefined;
+    };
+
+    const normalizePalette = (palette: unknown): Array<{ hex: string; name?: string }> => {
+      if (Array.isArray(palette)) {
+        return palette as Array<{ hex: string; name?: string }>;
+      }
+
+      if (typeof palette === "string") {
+        try {
+          const parsed = JSON.parse(palette);
+          return Array.isArray(parsed) ? (parsed as Array<{ hex: string; name?: string }>) : [];
+        } catch (error) {
+          console.warn("Failed to parse color palette", error);
+          return [];
+        }
+      }
+
+      return [];
+    };
+
+    const formatPreset = resolveFormatPreset();
+    const TemplateComponent = formatPreset ? templateComponents[formatPreset] : undefined;
     const title = brand?.title || brand?.tagline || "Untitled Brand";
+    const tagline = brand?.tagline || (parsedRawContext?.tagline as string | undefined);
+    const logoUrl = brand?.logo_url || (parsedRawContext?.logo_url as string | undefined);
+    const colorPalette = normalizePalette(brand?.color_palette ?? parsedRawContext?.color_palette);
 
     const content = TemplateComponent ? (
       <TemplateComponent
         title={title}
-        tagline={brand?.tagline}
-        logo_url={brand?.logo_url}
-        color_palette={brand?.color_palette}
+        tagline={tagline}
+        logo_url={logoUrl}
+        color_palette={colorPalette}
         markdown={markdown}
       />
     ) : (
@@ -41,16 +89,16 @@ export const BrandTemplateRenderer = forwardRef<HTMLDivElement, BrandTemplateRen
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-3xl font-bold mb-2">{title}</h1>
-                {brand?.tagline && <p className="text-muted-foreground">{brand.tagline}</p>}
+                {tagline && <p className="text-muted-foreground">{tagline}</p>}
               </div>
-              {brand?.logo_url && (
-                <img src={brand.logo_url} alt="Brand logo" className="h-20 w-20 object-contain" />
+              {logoUrl && (
+                <img src={logoUrl} alt="Brand logo" className="h-20 w-20 object-contain" />
               )}
             </div>
 
-            {Array.isArray(brand?.color_palette) && brand.color_palette.length > 0 && (
+            {colorPalette.length > 0 && (
               <div className="flex gap-2 mb-6">
-                {brand.color_palette.map((swatch: any, idx: number) => (
+                {colorPalette.map((swatch: any, idx: number) => (
                   <div
                     key={idx}
                     className="w-12 h-12 rounded-lg border border-border shadow-sm"
@@ -67,7 +115,7 @@ export const BrandTemplateRenderer = forwardRef<HTMLDivElement, BrandTemplateRen
 
             <div className="mt-8 pt-6 border-t border-border text-sm text-muted-foreground">
               <div className="flex items-center justify-between">
-                <div>Format: {brand?.format_preset || "Custom"}</div>
+                <div>Format: {formatPreset || "Custom"}</div>
                 {brand?.created_at && (
                   <div>Created: {new Date(brand.created_at).toLocaleDateString()}</div>
                 )}
