@@ -1,3 +1,6 @@
+const HTML2CANVAS_MODULE_ID = "html2canvas/dist/html2canvas.esm.js" as const;
+const JSPDF_MODULE_ID = "jspdf/dist/jspdf.es.min.js" as const;
+
 type Html2Canvas = typeof import("html2canvas")["default"];
 type JsPDFConstructor = typeof import("jspdf")["jsPDF"];
 
@@ -12,7 +15,7 @@ export const PDF_EXPORT_MODULE_ERROR_MESSAGE =
 const moduleLoadError = new Error(PDF_EXPORT_MODULE_ERROR_MESSAGE);
 
 async function importHtml2Canvas() {
-  const module = (await import("html2canvas")) as {
+  const module = (await import(HTML2CANVAS_MODULE_ID)) as {
     default?: Html2Canvas;
   } & Record<string, unknown>;
 
@@ -27,7 +30,7 @@ async function importHtml2Canvas() {
 }
 
 async function importJsPdf() {
-  const module = (await import("jspdf")) as {
+  const module = (await import(JSPDF_MODULE_ID)) as {
     default?: JsPDFConstructor;
     jsPDF?: JsPDFConstructor;
   } & Record<string, unknown>;
