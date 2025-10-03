@@ -1,6 +1,9 @@
+type Html2Canvas = typeof import("html2canvas")["default"];
+type JsPDFConstructor = typeof import("jspdf")["jsPDF"];
+
 let cachedToolsPromise: Promise<{
-  html2canvas: typeof import("html2canvas")["default"];
-  jsPDF: import("jspdf").jsPDF;
+  html2canvas: Html2Canvas;
+  jsPDF: JsPDFConstructor;
 }> | null = null;
 
 export const PDF_EXPORT_MODULE_ERROR_MESSAGE =
@@ -8,26 +11,43 @@ export const PDF_EXPORT_MODULE_ERROR_MESSAGE =
 
 const moduleLoadError = new Error(PDF_EXPORT_MODULE_ERROR_MESSAGE);
 
+async function importHtml2Canvas() {
+  const module = (await import("html2canvas")) as {
+    default?: Html2Canvas;
+  } & Record<string, unknown>;
+
+  const html2canvas =
+    module?.default ?? (module as unknown as Html2Canvas | undefined);
+
+  if (typeof html2canvas !== "function") {
+    throw moduleLoadError;
+  }
+
+  return html2canvas;
+}
+
+async function importJsPdf() {
+  const module = (await import("jspdf")) as {
+    default?: JsPDFConstructor;
+    jsPDF?: JsPDFConstructor;
+  } & Record<string, unknown>;
+
+  const jsPDF =
+    module?.jsPDF ??
+    module?.default ??
+    (module as unknown as JsPDFConstructor | undefined);
+
+  if (typeof jsPDF !== "function") {
+    throw moduleLoadError;
+  }
+
+  return jsPDF;
+}
+
 export async function loadPdfExportTools() {
   if (!cachedToolsPromise) {
-    cachedToolsPromise = Promise.all([
-      import("html2canvas"),
-      import("jspdf"),
-    ])
-      .then(([html2canvasModule, jsPDFModule]) => {
-        const html2canvas = html2canvasModule?.default;
-        const jsPDF = (jsPDFModule as any)?.jsPDF ?? jsPDFModule?.default;
-
-        if (typeof html2canvas !== "function") {
-          throw moduleLoadError;
-        }
-
-        if (typeof jsPDF !== "function") {
-          throw moduleLoadError;
-        }
-
-        return { html2canvas, jsPDF };
-      })
+    cachedToolsPromise = Promise.all([importHtml2Canvas(), importJsPdf()])
+      .then(([html2canvas, jsPDF]) => ({ html2canvas, jsPDF }))
       .catch((error) => {
         cachedToolsPromise = null;
         throw error;
