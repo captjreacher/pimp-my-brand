@@ -9,16 +9,18 @@ interface TemplateProps {
 }
 
 export const InfluencerTemplate = ({ title, tagline, logo_url, color_palette, markdown }: TemplateProps) => {
+  const sections = markdown.split('\n## ').filter(s => s.trim());
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-900 via-purple-900 to-blue-900">
-      {/* Modern Social Header */}
-      <div className="relative bg-gradient-to-r from-pink-600/30 via-purple-600/30 to-blue-600/30 backdrop-blur-xl border-b border-pink-500/30">
+      {/* Creator Profile Header */}
+      <div className="border-b border-pink-500/30 bg-gradient-to-r from-pink-600/20 via-purple-600/20 to-blue-600/20 backdrop-blur-xl relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(236,72,153,0.1),transparent)]" />
-        <div className="container mx-auto px-6 py-16 relative z-10">
+        <div className="container mx-auto px-6 py-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {logo_url && (
-              <div className="mb-6 inline-block">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 p-1 shadow-2xl shadow-pink-500/50">
+              <div className="mb-4 inline-block">
+                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 p-1 shadow-2xl shadow-pink-500/50">
                   <img 
                     src={logo_url} 
                     alt="Logo" 
@@ -27,11 +29,14 @@ export const InfluencerTemplate = ({ title, tagline, logo_url, color_palette, ma
                 </div>
               </div>
             )}
-            <h1 className="font-bold text-5xl md:text-6xl bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+            <div className="inline-block px-3 py-1 bg-pink-500/20 border border-pink-400/40 rounded-full mb-3">
+              <span className="text-pink-300 text-xs font-bold uppercase tracking-wider">Creator Profile</span>
+            </div>
+            <h1 className="font-bold text-4xl md:text-5xl bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
               {title}
             </h1>
             {tagline && (
-              <p className="text-xl text-pink-200/90 font-medium">
+              <p className="text-lg text-pink-200/90 font-medium">
                 {tagline}
               </p>
             )}
@@ -39,27 +44,68 @@ export const InfluencerTemplate = ({ title, tagline, logo_url, color_palette, ma
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12">
-        {/* Color Palette */}
-        {color_palette && color_palette.length > 0 && (
-          <div className="mb-12 flex gap-4 justify-center flex-wrap">
-            {color_palette.map((swatch, idx) => (
-              <div key={idx} className="text-center">
-                <div
-                  className="w-16 h-16 rounded-2xl shadow-xl transform transition-all hover:scale-110 hover:rotate-6 border border-white/20"
-                  style={{ background: swatch.hex }}
-                />
-                <span className="text-xs text-pink-200 mt-2 block">{swatch.name}</span>
-              </div>
-            ))}
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content Panel */}
+          <div className="lg:col-span-2 space-y-6">
+            {sections.map((section, idx) => {
+              const [heading, ...content] = section.split('\n');
+              const sectionTitle = heading.replace(/^#\s*/, '').trim();
+              
+              return (
+                <div key={idx} className="bg-slate-900/60 border border-pink-500/30 rounded-2xl overflow-hidden backdrop-blur-xl shadow-xl shadow-purple-900/20">
+                  <div className="bg-gradient-to-r from-pink-600/20 to-purple-600/20 border-b border-pink-500/30 px-5 py-3">
+                    <h2 className="font-bold text-base bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                      {sectionTitle}
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="prose prose-invert max-w-none prose-headings:bg-gradient-to-r prose-headings:from-pink-400 prose-headings:to-purple-400 prose-headings:bg-clip-text prose-headings:text-transparent prose-headings:font-bold prose-p:text-pink-100/90 prose-strong:text-pink-300 prose-ul:text-pink-100/90">
+                      <ReactMarkdown>{content.join('\n')}</ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
 
-        {/* Content */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-pink-500/20 rounded-3xl p-8 md:p-12 shadow-2xl shadow-purple-900/30">
-            <div className="prose prose-invert prose-lg max-w-none prose-headings:bg-gradient-to-r prose-headings:from-pink-400 prose-headings:to-purple-400 prose-headings:bg-clip-text prose-headings:text-transparent prose-headings:font-bold prose-strong:text-pink-300 prose-a:text-purple-400">
-              <ReactMarkdown>{markdown}</ReactMarkdown>
+          {/* Creator Stats Sidebar */}
+          <div className="space-y-6">
+            {/* Color Palette */}
+            {color_palette && color_palette.length > 0 && (
+              <div className="bg-slate-900/60 border border-pink-500/30 rounded-2xl overflow-hidden backdrop-blur-xl shadow-xl shadow-purple-900/20">
+                <div className="bg-gradient-to-r from-pink-600/20 to-purple-600/20 border-b border-pink-500/30 px-5 py-3">
+                  <h3 className="font-bold text-sm bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Brand Colors</h3>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-3">
+                  {color_palette.map((swatch, idx) => (
+                    <div key={idx} className="text-center">
+                      <div
+                        className="w-full h-14 rounded-2xl shadow-lg border border-white/20 mb-2 transform transition-all hover:scale-105 hover:rotate-3"
+                        style={{ background: swatch.hex }}
+                      />
+                      <span className="text-xs text-pink-200">{swatch.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Creator Stats */}
+            <div className="bg-slate-900/60 border border-pink-500/30 rounded-2xl overflow-hidden backdrop-blur-xl shadow-xl shadow-purple-900/20">
+              <div className="bg-gradient-to-r from-pink-600/20 to-purple-600/20 border-b border-pink-500/30 px-5 py-3">
+                <h3 className="font-bold text-sm bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Profile Stats</h3>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="bg-gradient-to-br from-pink-950/50 to-purple-950/50 border border-pink-500/20 rounded-xl p-3">
+                  <div className="text-xs text-pink-400 font-semibold mb-1">Category</div>
+                  <div className="text-sm text-pink-200 font-medium">Content Creator</div>
+                </div>
+                <div className="bg-gradient-to-br from-pink-950/50 to-purple-950/50 border border-pink-500/20 rounded-xl p-3">
+                  <div className="text-xs text-pink-400 font-semibold mb-1">Status</div>
+                  <div className="text-sm text-pink-200 font-medium">Active</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -9,15 +9,27 @@ interface TemplateProps {
 }
 
 export const NFLTemplate = ({ title, tagline, logo_url, color_palette, markdown }: TemplateProps) => {
+  const sections = markdown.split('\n## ').filter(s => s.trim());
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-950 via-slate-900 to-orange-950">
-      {/* Broadcast Style Header */}
-      <div className="relative bg-gradient-to-r from-orange-600 to-orange-700 border-b-8 border-orange-500">
+      {/* Player Card Header */}
+      <div className="border-b-8 border-orange-500/60 bg-gradient-to-r from-orange-600/40 to-orange-700/40 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_50%,transparent_50%,transparent_75%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05))] bg-[length:20px_20px]" />
-        <div className="container mx-auto px-6 py-12 relative z-10">
-          <div className="flex items-end justify-between">
+        <div className="container mx-auto px-6 py-6 relative z-10">
+          <div className="flex items-end gap-6">
+            {logo_url && (
+              <div className="shrink-0">
+                <div className="w-24 h-24 rounded-xl bg-white p-3 shadow-2xl ring-4 ring-orange-400 transform rotate-3">
+                  <img src={logo_url} alt="Logo" className="w-full h-full object-contain" />
+                </div>
+              </div>
+            )}
             <div className="flex-1">
-              <h1 className="font-black italic text-5xl md:text-6xl text-white mb-3 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] skew-y-[-2deg]">
+              <div className="inline-block px-3 py-1 bg-orange-500/80 rounded mb-2">
+                <span className="text-white text-xs font-black uppercase tracking-wider">Player Profile</span>
+              </div>
+              <h1 className="font-black italic text-4xl md:text-5xl text-white mb-1 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] skew-y-[-1deg]">
                 {title}
               </h1>
               {tagline && (
@@ -26,39 +38,73 @@ export const NFLTemplate = ({ title, tagline, logo_url, color_palette, markdown 
                 </p>
               )}
             </div>
-            {logo_url && (
-              <div className="ml-8 transform rotate-3">
-                <img 
-                  src={logo_url} 
-                  alt="Logo" 
-                  className="h-28 w-28 object-contain rounded-xl bg-white p-3 shadow-2xl"
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12">
-        {/* Color Palette */}
-        {color_palette && color_palette.length > 0 && (
-          <div className="mb-12 flex gap-4 justify-center">
-            {color_palette.map((swatch, idx) => (
-              <div key={idx} className="text-center">
-                <div
-                  className="w-16 h-16 rounded-full border-4 border-orange-500 shadow-xl transform transition-transform hover:scale-110"
-                  style={{ background: swatch.hex }}
-                />
-                <span className="text-xs text-orange-200 mt-2 block font-bold">{swatch.name}</span>
-              </div>
-            ))}
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Stats Panel */}
+          <div className="lg:col-span-2 space-y-6">
+            {sections.map((section, idx) => {
+              const [heading, ...content] = section.split('\n');
+              const sectionTitle = heading.replace(/^#\s*/, '').trim();
+              
+              return (
+                <div key={idx} className="bg-slate-800/90 border-4 border-orange-600/40 rounded-xl overflow-hidden backdrop-blur-sm shadow-xl">
+                  <div className="bg-orange-700/40 border-b-4 border-orange-600/40 px-5 py-3">
+                    <h2 className="font-black italic text-base uppercase tracking-wide text-orange-300">
+                      {sectionTitle}
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="prose prose-invert max-w-none prose-headings:font-black prose-headings:italic prose-headings:text-orange-400 prose-p:text-orange-50/90 prose-strong:text-orange-300 prose-ul:text-orange-50/90">
+                      <ReactMarkdown>{content.join('\n')}</ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
 
-        {/* Stats Card Style Content */}
-        <div className="bg-slate-800/90 backdrop-blur-sm border-4 border-orange-600/50 rounded-2xl p-8 md:p-12 shadow-2xl">
-          <div className="prose prose-invert prose-lg max-w-none prose-headings:font-black prose-headings:italic prose-headings:text-orange-400 prose-strong:text-orange-300 prose-a:text-orange-400">
-            <ReactMarkdown>{markdown}</ReactMarkdown>
+          {/* Player Stats Sidebar */}
+          <div className="space-y-6">
+            {/* Color Palette */}
+            {color_palette && color_palette.length > 0 && (
+              <div className="bg-slate-800/90 border-4 border-orange-600/40 rounded-xl overflow-hidden backdrop-blur-sm shadow-xl">
+                <div className="bg-orange-700/40 border-b-4 border-orange-600/40 px-5 py-3">
+                  <h3 className="font-black italic text-sm uppercase tracking-wide text-orange-300">Team Colors</h3>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-3">
+                  {color_palette.map((swatch, idx) => (
+                    <div key={idx} className="text-center">
+                      <div
+                        className="w-full h-14 rounded-full border-4 border-orange-500/50 shadow-lg mb-2"
+                        style={{ background: swatch.hex }}
+                      />
+                      <span className="text-xs text-orange-200 font-bold">{swatch.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Player Stats */}
+            <div className="bg-slate-800/90 border-4 border-orange-600/40 rounded-xl overflow-hidden backdrop-blur-sm shadow-xl">
+              <div className="bg-orange-700/40 border-b-4 border-orange-600/40 px-5 py-3">
+                <h3 className="font-black italic text-sm uppercase tracking-wide text-orange-300">Stats</h3>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="bg-orange-950/50 border-2 border-orange-700/30 rounded-lg p-3">
+                  <div className="text-xs text-orange-400 font-black uppercase mb-1">Position</div>
+                  <div className="text-sm text-orange-200 font-bold">All-Pro</div>
+                </div>
+                <div className="bg-orange-950/50 border-2 border-orange-700/30 rounded-lg p-3">
+                  <div className="text-xs text-orange-400 font-black uppercase mb-1">Status</div>
+                  <div className="text-sm text-orange-200 font-bold">Active</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
