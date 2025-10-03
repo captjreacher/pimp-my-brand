@@ -31,6 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BrandTemplateRenderer } from "@/components/brand/BrandTemplateRenderer";
+import {
+  loadPdfExportTools,
+  PDF_EXPORT_MODULE_ERROR_MESSAGE,
+} from "@/lib/pdf-export";
 
 export default function BrandView() {
   const { id } = useParams();
@@ -212,17 +216,7 @@ export default function BrandView() {
 
     setExporting(true);
     try {
-      const [html2canvasModule, jsPDFModule] = await Promise.all([
-        import("html2canvas"),
-        import("jspdf"),
-      ]);
-
-      const html2canvas = html2canvasModule?.default;
-      const jsPDF = jsPDFModule?.default;
-
-      if (typeof html2canvas !== "function" || typeof jsPDF !== "function") {
-        throw new Error("Missing PDF export dependencies");
-      }
+      const { html2canvas, jsPDF } = await loadPdfExportTools();
 
       const canvas = await html2canvas(brandContentRef.current, {
         scale: 2,
@@ -255,8 +249,8 @@ export default function BrandView() {
     } catch (error: any) {
       console.error("Export error:", error);
       const message =
-        error?.message === "Missing PDF export dependencies"
-          ? "Unable to load PDF export tools. Please reinstall dependencies and try again."
+        error?.message === PDF_EXPORT_MODULE_ERROR_MESSAGE
+          ? PDF_EXPORT_MODULE_ERROR_MESSAGE
           : error?.message || "Failed to export PDF";
       toast.error(message);
     } finally {
