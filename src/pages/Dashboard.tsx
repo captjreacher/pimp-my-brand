@@ -57,7 +57,7 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/settings")}
+                onClick={() => navigate("/profile")}
                 className="gap-2"
               >
                 <User className="w-4 h-4" />
@@ -102,7 +102,7 @@ const Dashboard = () => {
               icon={<FileText className="w-6 h-6" />}
               title="My Brands"
               description="View and edit your existing brands"
-              onClick={() => navigate("/brands")}
+              onClick={() => navigate("/profile?tab=brands")}
             />
 
             <DashboardCard
