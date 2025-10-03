@@ -10,6 +10,7 @@ import Gallery from "./pages/Gallery";
 import TemplatePreview from "./pages/TemplatePreview";
 import CreateBrand from "./pages/CreateBrand";
 import BrandView from "./pages/BrandView";
+import Uploads from "./pages/Uploads";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/create" element={<CreateBrand />} />
           <Route path="/brand/:id" element={<BrandView />} />
+          <Route path="/uploads" element={<Uploads />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
