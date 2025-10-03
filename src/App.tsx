@@ -13,6 +13,7 @@ import BrandView from "./pages/BrandView";
 import Uploads from "./pages/Uploads";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/template/:format" element={<TemplatePreview />} />
           <Route path="/pricing" element={<Pricing />} />
