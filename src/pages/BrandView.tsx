@@ -57,6 +57,26 @@ export default function BrandView() {
   });
   const brandContentRef = useRef<HTMLDivElement>(null);
 
+  const parseRawContext = (rawContext: unknown) => {
+    if (!rawContext) return null;
+
+    if (typeof rawContext === "string") {
+      try {
+        const parsed = JSON.parse(rawContext);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (error) {
+        console.warn("Failed to parse brand raw_context", error);
+        return null;
+      }
+    }
+
+    if (typeof rawContext === "object") {
+      return rawContext as Record<string, unknown>;
+    }
+
+    return null;
+  };
+
   useEffect(() => {
     loadBrand();
   }, [id]);
@@ -70,7 +90,10 @@ export default function BrandView() {
         .single();
 
       if (error) throw error;
-      setBrand(data);
+      setBrand({
+        ...data,
+        raw_context: parseRawContext(data.raw_context),
+      });
     } catch (error: any) {
       console.error("Load error:", error);
       toast.error("Failed to load brand");

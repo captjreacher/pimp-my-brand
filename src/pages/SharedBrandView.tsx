@@ -32,6 +32,26 @@ export default function SharedBrandView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  const parseRawContext = (rawContext: unknown) => {
+    if (!rawContext) return null;
+
+    if (typeof rawContext === "string") {
+      try {
+        const parsed = JSON.parse(rawContext);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (error) {
+        console.warn("Failed to parse shared brand raw_context", error);
+        return null;
+      }
+    }
+
+    if (typeof rawContext === "object") {
+      return rawContext as Record<string, unknown>;
+    }
+
+    return null;
+  };
+
   const loadSharedBrand = async () => {
     if (!token) {
       setError("Missing share token");
@@ -78,7 +98,10 @@ export default function SharedBrandView() {
       if (brandError) throw brandError;
 
       setShare(record);
-      setBrand(brandData);
+      setBrand({
+        ...brandData,
+        raw_context: parseRawContext(brandData.raw_context),
+      });
     } catch (err: any) {
       console.error("Shared view error:", err);
       setError(err?.message || "Unable to load shared brand");
