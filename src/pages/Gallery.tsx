@@ -150,8 +150,8 @@ const Gallery = () => {
                       size="sm"
                       className="w-full gap-2"
                     >
-                      <Link to="/create">
-                        Use Template
+                      <Link to={`/template/${template.format_preset}`}>
+                        Preview Template
                         <ExternalLink className="w-4 h-4" />
                       </Link>
                     </Button>

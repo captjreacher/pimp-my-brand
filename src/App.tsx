@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Gallery from "./pages/Gallery";
+import TemplatePreview from "./pages/TemplatePreview";
 import CreateBrand from "./pages/CreateBrand";
 import BrandView from "./pages/BrandView";
 import Pricing from "./pages/Pricing";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/template/:format" element={<TemplatePreview />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/create" element={<CreateBrand />} />
           <Route path="/brand/:id" element={<BrandView />} />
