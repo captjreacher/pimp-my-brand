@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Gallery from "./pages/Gallery";
 import TemplatePreview from "./pages/TemplatePreview";
+import SharedBrandView from "./pages/SharedBrandView";
 import CreateBrand from "./pages/CreateBrand";
 import BrandView from "./pages/BrandView";
 import Uploads from "./pages/Uploads";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/template/:format" element={<TemplatePreview />} />
+          <Route path="/share/:token" element={<SharedBrandView />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/create" element={<CreateBrand />} />
           <Route path="/brand/:id" element={<BrandView />} />
