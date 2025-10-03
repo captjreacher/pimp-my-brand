@@ -12,11 +12,12 @@ export const PDF_EXPORT_MODULE_ERROR_MESSAGE =
 const moduleLoadError = new Error(PDF_EXPORT_MODULE_ERROR_MESSAGE);
 
 async function importHtml2Canvas() {
-  const module = (await import("html2canvas/dist/html2canvas.esm.js")) as {
+  const module = (await import("html2canvas")) as {
     default?: Html2Canvas;
-  };
+  } & Record<string, unknown>;
 
-  const html2canvas = module?.default;
+  const html2canvas =
+    module?.default ?? (module as unknown as Html2Canvas | undefined);
 
   if (typeof html2canvas !== "function") {
     throw moduleLoadError;
@@ -26,12 +27,15 @@ async function importHtml2Canvas() {
 }
 
 async function importJsPdf() {
-  const module = (await import("jspdf/dist/jspdf.es.min.js")) as {
+  const module = (await import("jspdf")) as {
     default?: JsPDFConstructor;
     jsPDF?: JsPDFConstructor;
-  };
+  } & Record<string, unknown>;
 
-  const jsPDF = module?.jsPDF ?? module?.default;
+  const jsPDF =
+    module?.jsPDF ??
+    module?.default ??
+    (module as unknown as JsPDFConstructor | undefined);
 
   if (typeof jsPDF !== "function") {
     throw moduleLoadError;
