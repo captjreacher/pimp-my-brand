@@ -1,14 +1,22 @@
 import ReactMarkdown from "react-markdown";
 
+interface TemplateAvatar {
+  url: string;
+  alt: string;
+  mode?: "fictional" | "personal";
+  showPersonalizationHint?: boolean;
+}
+
 interface TemplateProps {
   title: string;
   tagline?: string;
   logo_url?: string;
   color_palette?: Array<{ hex: string; name: string }>;
   markdown: string;
+  avatar?: TemplateAvatar;
 }
 
-export const ExecutiveTemplate = ({ title, tagline, logo_url, color_palette, markdown }: TemplateProps) => {
+export const ExecutiveTemplate = ({ title, tagline, logo_url, color_palette, markdown, avatar }: TemplateProps) => {
   const sections = markdown.split('\n## ').filter(s => s.trim());
   
   return (
@@ -16,7 +24,7 @@ export const ExecutiveTemplate = ({ title, tagline, logo_url, color_palette, mar
       {/* Executive Dashboard Header */}
       <div className="border-b border-slate-700/50 bg-slate-800/40 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center gap-6 max-w-6xl mx-auto">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center max-w-6xl mx-auto">
             {logo_url && (
               <div className="shrink-0">
                 <div className="w-20 h-20 rounded-xl bg-slate-700/50 p-3 border border-slate-600 shadow-lg">
@@ -37,6 +45,23 @@ export const ExecutiveTemplate = ({ title, tagline, logo_url, color_palette, mar
                 </p>
               )}
             </div>
+            {avatar && (
+              <div className="lg:w-56">
+                <div className="relative overflow-hidden rounded-2xl border border-slate-600/60 bg-slate-900/60 shadow-[0_0_35px_rgba(59,130,246,0.25)]">
+                  <img src={avatar.url} alt={avatar.alt} className="h-72 w-full object-cover" />
+                  {avatar.showPersonalizationHint && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/65 to-black/85 flex items-end">
+                      <p className="w-full px-4 pb-4 text-xs font-medium uppercase tracking-wider text-slate-200 text-center">
+                        Add an executive headshot in Profile → Avatar & Media to tailor this leadership portrait.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-3 text-xs uppercase tracking-wide text-slate-300/80 text-center">
+                  {avatar.mode === "personal" ? "Personalized leadership visual" : "Fictional boardroom avatar"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
