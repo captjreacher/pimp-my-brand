@@ -15,6 +15,8 @@ import Uploads from "./pages/Uploads";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import PlayerProfile from "./pages/PlayerProfile";
+import Shop from "./pages/Shop";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/player-profile" element={<PlayerProfile />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/template/:format" element={<TemplatePreview />} />
           <Route path="/share/:token" element={<SharedBrandView />} />
@@ -36,6 +39,7 @@ const App = () => (
           <Route path="/create" element={<CreateBrand />} />
           <Route path="/brand/:id" element={<BrandView />} />
           <Route path="/uploads" element={<Uploads />} />
+          <Route path="/shop" element={<Shop />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

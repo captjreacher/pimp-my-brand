@@ -1,22 +1,30 @@
 import ReactMarkdown from "react-markdown";
 
+interface TemplateAvatar {
+  url: string;
+  alt: string;
+  mode?: "fictional" | "personal";
+  showPersonalizationHint?: boolean;
+}
+
 interface TemplateProps {
   title: string;
   tagline?: string;
   logo_url?: string;
   color_palette?: Array<{ hex: string; name: string }>;
   markdown: string;
+  avatar?: TemplateAvatar;
 }
 
-export const TeamTemplate = ({ title, tagline, logo_url, color_palette, markdown }: TemplateProps) => {
+export const TeamTemplate = ({ title, tagline, logo_url, color_palette, markdown, avatar }: TemplateProps) => {
   const sections = markdown.split('\n## ').filter(s => s.trim());
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 via-slate-900 to-blue-950">
       {/* Team Roster Header */}
       <div className="border-b-4 border-blue-500/50 bg-gradient-to-r from-blue-900/40 to-blue-800/40 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
             {logo_url && (
               <div className="shrink-0">
                 <div className="w-24 h-24 rounded-full bg-white p-3 shadow-xl shadow-blue-500/30 ring-4 ring-blue-400/50">
@@ -37,6 +45,23 @@ export const TeamTemplate = ({ title, tagline, logo_url, color_palette, markdown
                 </p>
               )}
             </div>
+            {avatar && (
+              <div className="lg:w-56">
+                <div className="relative overflow-hidden rounded-2xl border-2 border-blue-400/60 bg-slate-900/50 shadow-[0_0_32px_rgba(59,130,246,0.35)]">
+                  <img src={avatar.url} alt={avatar.alt} className="h-72 w-full object-cover" />
+                  {avatar.showPersonalizationHint && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/65 to-slate-950/85 flex items-end">
+                      <p className="w-full px-4 pb-4 text-xs font-semibold uppercase tracking-wide text-blue-100 text-center">
+                        Personalize this jersey with your face from the Profile locker.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-3 text-xs uppercase tracking-wide text-blue-200/80 text-center">
+                  {avatar.mode === "personal" ? "Team sheet with your face" : "Fictional club captain"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

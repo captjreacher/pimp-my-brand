@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Upload, Link2, LogOut, User } from "lucide-react";
+import { Plus, LogOut, User, IdCard, ShoppingBag, Image } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -99,38 +99,24 @@ const Dashboard = () => {
             />
 
             <DashboardCard
-              icon={<FileText className="w-6 h-6" />}
-              title="My Brands"
-              description="View and edit your existing brands"
-              onClick={() => navigate("/profile?tab=brands")}
-            />
-
-            <DashboardCard
-              icon={<FileText className="w-6 h-6" />}
-              title="My CVs"
-              description="View and edit your CVs"
-              onClick={() => navigate("/cvs")}
-            />
-
-            <DashboardCard
-              icon={<Upload className="w-6 h-6" />}
-              title="Uploads"
-              description="Manage your uploaded files"
-              onClick={() => navigate("/uploads")}
-            />
-
-            <DashboardCard
-              icon={<Link2 className="w-6 h-6" />}
-              title="Connect Sources"
-              description="Link external content sources"
-              onClick={() => navigate("/sources")}
-            />
-
-            <DashboardCard
-              icon={<User className="w-6 h-6" />}
+              icon={<Image className="w-6 h-6" />}
               title="Gallery"
               description="Browse public brands"
               onClick={() => navigate("/gallery")}
+            />
+
+            <DashboardCard
+              icon={<IdCard className="w-6 h-6" />}
+              title="Player Profile"
+              description="Dial in your on-stage introductions and accolades"
+              onClick={() => navigate("/player-profile")}
+            />
+
+            <DashboardCard
+              icon={<ShoppingBag className="w-6 h-6" />}
+              title="Shop"
+              description="Outfit templates with uniforms and premium looks"
+              onClick={() => navigate("/shop")}
             />
           </div>
         </div>

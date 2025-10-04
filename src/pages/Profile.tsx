@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import {
   ArrowUpRight,
@@ -60,6 +61,20 @@ interface WardrobeTier {
   description: string;
   unlocked: boolean;
   items: string[];
+}
+
+interface TemplateUniformOption {
+  id: string;
+  name: string;
+  description: string;
+  tier: "free" | "pro" | "elite";
+}
+
+interface TemplateUniform {
+  templateId: string;
+  templateName: string;
+  description: string;
+  options: TemplateUniformOption[];
 }
 
 const SAMPLE_BRANDS: BrandSummary[] = [
@@ -135,6 +150,109 @@ const INITIAL_WARDROBE: WardrobeTier[] = [
   },
 ];
 
+const TEMPLATE_UNIFORMS: TemplateUniform[] = [
+  {
+    templateId: "ufc",
+    templateName: "Octagon Champion",
+    description: "Select the fight kit that appears across UFC-style templates.",
+    options: [
+      {
+        id: "fight-night",
+        name: "Fight Night Classic",
+        description: "Default crimson walkout gear included with every account.",
+        tier: "free",
+      },
+      {
+        id: "championship-gold",
+        name: "Championship Gold",
+        description: "Pro members unlock gold trim, banner lighting, and entrance FX.",
+        tier: "pro",
+      },
+      {
+        id: "legacy-immortal",
+        name: "Legacy Immortal",
+        description: "Elite-exclusive holographic robe with pyro choreography.",
+        tier: "elite",
+      },
+    ],
+  },
+  {
+    templateId: "team",
+    templateName: "Club Captain",
+    description: "Define the jersey used in team and league decks.",
+    options: [
+      {
+        id: "home-tipoff",
+        name: "Home Tip-Off",
+        description: "Traditional home colors—free for every roster.",
+        tier: "free",
+      },
+      {
+        id: "city-edition",
+        name: "City Edition",
+        description: "Pro upgrade featuring neon trim and alternate shorts.",
+        tier: "pro",
+      },
+      {
+        id: "legends-throwback",
+        name: "Legends Throwback",
+        description: "Elite throwback set with tunnel camera overlays.",
+        tier: "elite",
+      },
+    ],
+  },
+  {
+    templateId: "nfl",
+    templateName: "Primetime Receiver",
+    description: "Control the uniforms appearing in American football templates.",
+    options: [
+      {
+        id: "primetime-home",
+        name: "Primetime Home",
+        description: "Baseline kit, optimized for quick exports and highlights.",
+        tier: "free",
+      },
+      {
+        id: "color-rush",
+        name: "Color Rush",
+        description: "Pro members add LED tunnel intros and alternate jerseys.",
+        tier: "pro",
+      },
+      {
+        id: "hall-of-fame",
+        name: "Hall of Fame",
+        description: "Elite sequence with gold jacket ceremony visuals.",
+        tier: "elite",
+      },
+    ],
+  },
+  {
+    templateId: "executive",
+    templateName: "Boardroom Visionary",
+    description: "Dress the executive persona for keynotes and investor decks.",
+    options: [
+      {
+        id: "boardroom-foundation",
+        name: "Boardroom Foundation",
+        description: "Tailored charcoal suit—always free.",
+        tier: "free",
+      },
+      {
+        id: "global-keynote",
+        name: "Global Keynote",
+        description: "Pro upgrade with spotlight stage and choreographed camera moves.",
+        tier: "pro",
+      },
+      {
+        id: "future-forward",
+        name: "Future Forward",
+        description: "Elite couture featuring kinetic LED backdrop.",
+        tier: "elite",
+      },
+    ],
+  },
+];
+
 const Profile = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -149,6 +267,12 @@ const Profile = () => {
   const [wardrobeTiers, setWardrobeTiers] = useState<WardrobeTier[]>(INITIAL_WARDROBE);
   const [newWardrobeItem, setNewWardrobeItem] = useState<Record<string, string>>({});
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uniformPreferences, setUniformPreferences] = useState<Record<string, string>>(() =>
+    TEMPLATE_UNIFORMS.reduce((acc, template) => {
+      acc[template.templateId] = template.options[0]?.id ?? "";
+      return acc;
+    }, {} as Record<string, string>),
+  );
   const uploadedUrlsRef = useRef<string[]>([]);
 
   const [profileData, setProfileData] = useState({
@@ -386,6 +510,13 @@ const Profile = () => {
   };
 
   const totalFavoriteCount = favoriteBrandIds.length;
+
+  const handleUniformChange = (templateId: string, optionId: string) => {
+    setUniformPreferences((prev) => ({
+      ...prev,
+      [templateId]: optionId,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -722,6 +853,75 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="wardrobe" className="space-y-8">
+            <Card className="border-border/60">
+              <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <CardTitle>Uniform presets</CardTitle>
+                  <CardDescription>
+                    Choose the base outfit each persona uses by default. Upgrades sync from the Shop and Player Profile locker.
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => navigate("/shop")}>Open Shop</Button>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {TEMPLATE_UNIFORMS.map((template) => {
+                  const selected = uniformPreferences[template.templateId];
+                  return (
+                    <div
+                      key={template.templateId}
+                      className="rounded-2xl border border-border/70 bg-background/60 p-5"
+                    >
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <h3 className="font-heading text-lg font-semibold">{template.templateName}</h3>
+                          <p className="text-sm text-muted-foreground">{template.description}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => navigate(`/template/${template.templateId}`)}
+                        >
+                          Preview template
+                          <ArrowUpRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <RadioGroup
+                        value={selected}
+                        onValueChange={(value) => handleUniformChange(template.templateId, value)}
+                        className="mt-4 space-y-3"
+                      >
+                        {template.options.map((option) => {
+                          const optionId = `${template.templateId}-${option.id}`;
+                          const isActive = selected === option.id;
+                          return (
+                            <Label
+                              key={option.id}
+                              htmlFor={optionId}
+                              className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition hover:border-secondary/60 hover:bg-secondary/10 ${
+                                isActive ? "border-secondary/70 bg-secondary/10" : "border-border/60 bg-surface/60"
+                              }`}
+                            >
+                              <RadioGroupItem id={optionId} value={option.id} className="mt-1" />
+                              <div className="space-y-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-medium">{option.name}</span>
+                                  <Badge variant={option.tier === "free" ? "secondary" : "outline"}>
+                                    {option.tier.toUpperCase()}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{option.description}</p>
+                              </div>
+                            </Label>
+                          );
+                        })}
+                      </RadioGroup>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+
             <Card className="border-border/60">
               <CardHeader>
                 <CardTitle>Wardrobe progression</CardTitle>

@@ -1,23 +1,31 @@
 import ReactMarkdown from "react-markdown";
 
+interface TemplateAvatar {
+  url: string;
+  alt: string;
+  mode?: "fictional" | "personal";
+  showPersonalizationHint?: boolean;
+}
+
 interface TemplateProps {
   title: string;
   tagline?: string;
   logo_url?: string;
   color_palette?: Array<{ hex: string; name: string }>;
   markdown: string;
+  avatar?: TemplateAvatar;
 }
 
-export const UFCTemplate = ({ title, tagline, logo_url, color_palette, markdown }: TemplateProps) => {
+export const UFCTemplate = ({ title, tagline, logo_url, color_palette, markdown, avatar }: TemplateProps) => {
   const sections = markdown.split('\n## ').filter(s => s.trim());
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-950 via-black to-red-950">
       {/* Fighter Card Header */}
       <div className="border-b-4 border-red-600 bg-black/70 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iIzMzMCIgc3Ryb2tlLW9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
         <div className="container mx-auto px-6 py-6 relative z-10">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
             {logo_url && (
               <div className="shrink-0">
                 <div className="w-24 h-24 rounded-xl bg-black/60 border-2 border-red-600 p-3 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
@@ -38,6 +46,23 @@ export const UFCTemplate = ({ title, tagline, logo_url, color_palette, markdown 
                 </p>
               )}
             </div>
+            {avatar && (
+              <div className="lg:w-56">
+                <div className="relative overflow-hidden rounded-2xl border-2 border-red-600/70 bg-black/50 shadow-[0_0_40px_rgba(239,68,68,0.35)]">
+                  <img src={avatar.url} alt={avatar.alt} className="h-72 w-full object-cover" />
+                  {avatar.showPersonalizationHint && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-black/80 flex items-end">
+                      <p className="w-full px-4 pb-4 text-xs font-medium uppercase tracking-wide text-red-100 text-center">
+                        Upload your face in Profile → Avatar & Media to swap onto this body kit.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-3 text-xs uppercase tracking-wide text-red-200/80 text-center">
+                  {avatar.mode === "personal" ? "Personalized fight kit" : "Fictional roster avatar"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,14 +1,22 @@
 import ReactMarkdown from "react-markdown";
 
+interface TemplateAvatar {
+  url: string;
+  alt: string;
+  mode?: "fictional" | "personal";
+  showPersonalizationHint?: boolean;
+}
+
 interface TemplateProps {
   title: string;
   tagline?: string;
   logo_url?: string;
   color_palette?: Array<{ hex: string; name: string }>;
   markdown: string;
+  avatar?: TemplateAvatar;
 }
 
-export const MilitaryTemplate = ({ title, tagline, logo_url, color_palette, markdown }: TemplateProps) => {
+export const MilitaryTemplate = ({ title, tagline, logo_url, color_palette, markdown, avatar }: TemplateProps) => {
   const sections = markdown.split('\n## ').filter(s => s.trim());
   
   return (
@@ -16,7 +24,7 @@ export const MilitaryTemplate = ({ title, tagline, logo_url, color_palette, mark
       {/* Tactical Header */}
       <div className="border-b border-green-700/30 bg-black/40 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
             {logo_url && (
               <div className="shrink-0">
                 <div className="w-20 h-20 rounded-lg bg-green-950/60 border-2 border-green-600/50 p-2 shadow-lg shadow-green-900/50">
@@ -37,6 +45,23 @@ export const MilitaryTemplate = ({ title, tagline, logo_url, color_palette, mark
                 </p>
               )}
             </div>
+            {avatar && (
+              <div className="lg:w-56">
+                <div className="relative overflow-hidden rounded-2xl border-2 border-green-600/50 bg-slate-950/60 shadow-[0_0_30px_rgba(34,197,94,0.28)]">
+                  <img src={avatar.url} alt={avatar.alt} className="h-72 w-full object-cover" />
+                  {avatar.showPersonalizationHint && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-green-950/70 to-black/85 flex items-end">
+                      <p className="w-full px-4 pb-4 text-[11px] font-mono uppercase tracking-widest text-green-100 text-center">
+                        Sync your face in Profile → Avatar & Media to render on this uniform.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-3 text-[11px] font-mono uppercase tracking-widest text-green-200/80 text-center">
+                  {avatar.mode === "personal" ? "Personal deployment visual" : "Fictional special ops avatar"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
