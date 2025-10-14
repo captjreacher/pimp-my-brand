@@ -32,8 +32,14 @@ export default function CreateBrand() {
     setStep(4);
   };
 
-  const handleGenerateComplete = (brandId: string) => {
-    navigate(`/brand/${brandId}`);
+  const handleGenerateComplete = (brandId: string, cvId?: string) => {
+    if (cvId) {
+      // If CV was generated, navigate to a page that shows both
+      navigate(`/brand/${brandId}?cv=${cvId}`);
+    } else {
+      // Just brand generated
+      navigate(`/brand/${brandId}`);
+    }
   };
 
   return (

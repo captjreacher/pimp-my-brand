@@ -36,7 +36,12 @@ import {
   UploadCloud,
   Wand2,
   X,
+  Settings,
+  BarChart3,
 } from "lucide-react";
+import { AdvancedProfileEditor } from "@/components/profile/AdvancedProfileEditor";
+import { ProfileAnalytics } from "@/components/profile/ProfileAnalytics";
+import { useProfile } from "@/hooks/use-profile";
 
 interface BrandSummary {
   id: string;
@@ -274,6 +279,9 @@ const Profile = () => {
     }, {} as Record<string, string>),
   );
   const uploadedUrlsRef = useRef<string[]>([]);
+
+  // Use the new profile hook
+  const { profile, analytics, isLoading: isLoadingProfile, updateProfile, isUpdating } = useProfile();
 
   const [profileData, setProfileData] = useState({
     fullName: "Jordan Rivers",
@@ -550,6 +558,14 @@ const Profile = () => {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
           <TabsList className="flex flex-wrap gap-2 bg-surface/80 p-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="editor" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Profile Editor
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
             <TabsTrigger value="media">Avatar & Media</TabsTrigger>
             <TabsTrigger value="wardrobe">Wardrobe Path</TabsTrigger>
             <TabsTrigger value="brands">My Brands</TabsTrigger>
@@ -745,6 +761,42 @@ const Profile = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="editor" className="space-y-8">
+            {profile ? (
+              <AdvancedProfileEditor
+                profile={profile}
+                onSave={updateProfile}
+                isLoading={isUpdating}
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <p className="text-muted-foreground">Loading profile...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-8">
+            {analytics ? (
+              <ProfileAnalytics 
+                analytics={analytics} 
+                isLoading={isLoadingProfile} 
+                userId={session?.user?.id}
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <p className="text-muted-foreground">Loading analytics...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="media" className="space-y-8">

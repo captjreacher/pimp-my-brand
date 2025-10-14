@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import {
   Loader2,
   Copy,
   Check,
+  FileText,
+  User,
 } from "lucide-react";
 import {
   Dialog,
@@ -31,6 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BrandTemplateRenderer } from "@/components/brand/BrandTemplateRenderer";
+import { CVPreview } from "@/components/brand/CVPreview";
+import { CVEditor } from "@/components/editing/CVEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   loadPdfExportTools,
   PDF_EXPORT_MODULE_ERROR_MESSAGE,
@@ -39,8 +44,13 @@ import {
 export default function BrandView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const cvId = searchParams.get("cv");
   const [brand, setBrand] = useState<any>(null);
+  const [cv, setCV] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("brand");
+  const [editMode, setEditMode] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -79,7 +89,10 @@ export default function BrandView() {
 
   useEffect(() => {
     loadBrand();
-  }, [id]);
+    if (cvId) {
+      loadCV();
+    }
+  }, [id, cvId]);
 
   const loadBrand = async () => {
     try {
@@ -98,6 +111,26 @@ export default function BrandView() {
       console.error("Load error:", error);
       toast.error("Failed to load brand");
       navigate("/dashboard");
+    } finally {
+      if (!cvId) setLoading(false);
+    }
+  };
+
+  const loadCV = async () => {
+    if (!cvId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("cvs")
+        .select("*")
+        .eq("id", cvId)
+        .single();
+
+      if (error) throw error;
+      setCV(data);
+    } catch (error: any) {
+      console.error("CV load error:", error);
+      toast.error("Failed to load CV");
     } finally {
       setLoading(false);
     }
@@ -281,6 +314,30 @@ export default function BrandView() {
     }
   };
 
+  const currentContent = activeTab === "brand" ? brand : cv;
+  const currentTitle = activeTab === "brand" ? "Brand Rider" : "Professional CV";
+
+  const handleCVChange = (updatedCV: any) => {
+    setCV(updatedCV);
+  };
+
+  const handleCVSave = async (updatedCV: any) => {
+    const { error } = await supabase
+      .from("cvs")
+      .update({
+        title: updatedCV.title || null,
+        summary: updatedCV.summary || null,
+        experience: updatedCV.experience || [],
+        skills: updatedCV.skills || [],
+        links: updatedCV.links || [],
+        format_preset: updatedCV.format || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", cv.id);
+
+    if (error) throw error;
+  };
+
   return (
     <div className="min-h-screen">
       {/* Action Bar */}
@@ -292,9 +349,29 @@ export default function BrandView() {
               Back to Dashboard
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={editDefaults}>
+              {cv && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/cv/${cv.id}`)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View CV Separately
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  if (activeTab === "brand") {
+                    editDefaults();
+                  } else {
+                    setEditMode(!editMode);
+                  }
+                }}
+              >
                 <Edit className="w-4 h-4 mr-2" />
-                Edit
+                Edit {currentTitle}
               </Button>
               <Button
                 variant="outline"
@@ -327,7 +404,38 @@ export default function BrandView() {
         </div>
       </div>
 
-      <BrandTemplateRenderer ref={brandContentRef} brand={brand} markdown={markdown} />
+      {cv ? (
+        <div className="container mx-auto px-6 py-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="brand" className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Brand Rider
+              </TabsTrigger>
+              <TabsTrigger value="cv" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Professional CV
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="brand">
+              <BrandTemplateRenderer ref={brandContentRef} brand={brand} markdown={markdown} />
+            </TabsContent>
+            <TabsContent value="cv">
+              {editMode ? (
+                <CVEditor 
+                  cv={cv} 
+                  onChange={handleCVChange}
+                  onSave={handleCVSave}
+                />
+              ) : (
+                <CVPreview ref={brandContentRef} cv={cv} />
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      ) : (
+        <BrandTemplateRenderer ref={brandContentRef} brand={brand} markdown={markdown} />
+      )}
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
