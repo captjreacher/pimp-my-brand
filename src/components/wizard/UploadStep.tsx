@@ -177,7 +177,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="font-heading text-3xl mb-2">Upload Your Content</h2>
-        <p className="text-muted">
+        <p className="text-muted-foreground">
           Upload documents that represent your voice and work
         </p>
       </div>
@@ -187,7 +187,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
         role="region"
         aria-label="File upload area"
       >
-        <Upload className="w-12 h-12 mx-auto mb-4 text-muted" aria-hidden="true" />
+        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
         <label className="cursor-pointer">
           <span className="text-primary hover:text-primary/80 font-medium">
             Choose files
@@ -201,7 +201,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
             aria-describedby="file-upload-help"
           />
         </label>
-        <p id="file-upload-help" className="text-sm text-muted mt-2">
+        <p id="file-upload-help" className="text-sm text-muted-foreground mt-2">
           Supports: TXT, MD, PDF, DOCX, Images. Multiple files allowed.
         </p>
       </div>
@@ -253,7 +253,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
                     )}
                     <div>
                       <div className="text-sm font-medium">{file.name}</div>
-                      <div className="text-xs text-muted">
+                      <div className="text-xs text-muted-foreground">
                         {(file.size / 1024).toFixed(1)} KB
                         {needsOCR && (
                           <span className="ml-2 text-blue-500">

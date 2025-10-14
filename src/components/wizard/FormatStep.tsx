@@ -413,7 +413,7 @@ export function FormatStep({ onComplete }: FormatStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="font-heading text-3xl mb-2">Choose Your Format</h2>
-        <p className="text-muted">
+        <p className="text-muted-foreground">
           Select a presentation style for your Brand Rider
         </p>
       </div>
@@ -473,7 +473,7 @@ export function FormatStep({ onComplete }: FormatStepProps) {
                         isSelected ? "bg-primary/10" : "bg-surface/50"
                       }`}>
                         <div className="flex items-start gap-3">
-                          <Icon className={`w-6 h-6 flex-shrink-0 ${isSelected ? "text-primary" : "text-muted"}`} aria-hidden="true" />
+                          <Icon className={`w-6 h-6 flex-shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} aria-hidden="true" />
                           <div className="text-left flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-heading font-semibold">{overlay.name}</h3>
@@ -490,7 +490,7 @@ export function FormatStep({ onComplete }: FormatStepProps) {
                                 </Badge>
                               )}
                             </div>
-                            <p id={`format-${formatConfig.id}-desc`} className="text-sm text-muted">{overlay.description}</p>
+                            <p id={`format-${formatConfig.id}-desc`} className="text-sm text-muted-foreground">{overlay.description}</p>
                           </div>
                         </div>
                       </div>

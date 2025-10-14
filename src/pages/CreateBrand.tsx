@@ -43,7 +43,7 @@ export default function CreateBrand() {
   };
 
   return (
-    <div className="min-h-screen bg-bg py-12">
+    <div className="min-h-screen bg-background py-12">
       <div className="container max-w-4xl mx-auto px-4">
         {step < 4 && (
           <Button

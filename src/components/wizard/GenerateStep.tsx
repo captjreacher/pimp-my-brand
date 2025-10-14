@@ -197,7 +197,7 @@ export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, o
             <Sparkles className="w-8 h-8 text-green-600" />
           </div>
           <h2 className="font-heading text-3xl">Brand Created Successfully!</h2>
-          <p className="text-muted max-w-md mx-auto">
+          <p className="text-muted-foreground max-w-md mx-auto">
             Your Brand Rider is ready. Would you also like to generate a professional CV using the same style and format?
           </p>
         </div>
@@ -239,7 +239,7 @@ export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, o
       <h2 className="font-heading text-3xl">
         {generateCV ? "Creating Your CV" : "Creating Your Brand"}
       </h2>
-      <p className="text-muted max-w-md mx-auto">{stage}</p>
+      <p className="text-muted-foreground max-w-md mx-auto">{stage}</p>
       {generating && (
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
       )}

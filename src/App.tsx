@@ -19,6 +19,7 @@ const TemplatePreview = lazy(() => import("./pages/TemplatePreview"));
 const SharedContent = lazy(() => import("./pages/SharedContent").then(module => ({ default: module.SharedContent })));
 const CreateBrand = lazy(() => import("./pages/CreateBrand"));
 const BrandView = lazy(() => import("./pages/BrandView"));
+const BrandEditor = lazy(() => import("./pages/BrandEditor"));
 const CVView = lazy(() => import("./pages/CVView"));
 const Uploads = lazy(() => import("./pages/Uploads"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -60,6 +61,7 @@ const App = () => {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/create" element={<CreateBrand />} />
             <Route path="/brand/:id" element={<BrandView />} />
+            <Route path="/brand/:id/edit" element={<BrandEditor />} />
             <Route path="/cv/:id" element={<CVView />} />
             <Route path="/uploads" element={<Uploads />} />
             <Route path="/shop" element={<Shop />} />

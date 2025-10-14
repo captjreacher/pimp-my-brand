@@ -85,7 +85,9 @@ export class PDFExporter {
     options: Required<PDFExportOptions>
   ): Promise<PDFExportResult> {
     try {
+      console.log('Loading PDF export tools...');
       const { jsPDF } = await loadPdfExportTools();
+      console.log('PDF tools loaded successfully');
       
       // Create a temporary container for the HTML content
       const container = document.createElement('div');
@@ -128,6 +130,7 @@ export class PDFExporter {
         const pdfBlob = pdf.output('blob');
         const url = URL.createObjectURL(pdfBlob);
 
+        console.log('PDF generated successfully');
         return {
           blob: pdfBlob,
           url,
@@ -138,6 +141,7 @@ export class PDFExporter {
         document.body.removeChild(container);
       }
     } catch (error) {
+      console.error('PDF export error details:', error);
       throw new Error(`PDF export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }

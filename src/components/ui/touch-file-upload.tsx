@@ -182,7 +182,7 @@ const TouchFileUpload = React.forwardRef<HTMLDivElement, TouchFileUploadProps>(
           role="region"
           aria-label="File upload area"
         >
-          <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 text-muted" aria-hidden="true" />
+          <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
           
           <div className="space-y-2">
             <AccessibleButton
