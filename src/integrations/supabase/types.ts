@@ -14,8 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action_type: string
+          admin_user_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          target_id: string | null
+          target_type: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_user_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_id?: string | null
+          target_type?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_user_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_id?: string | null
+          target_type?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      admin_config: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          session_end: string | null
+          session_start: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          session_end?: string | null
+          session_start?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          session_end?: string | null
+          session_start?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
+          avatar_url: string | null
           bio: string | null
           color_palette: Json | null
           created_at: string | null
@@ -36,6 +130,7 @@ export type Database = {
           weaknesses: string[] | null
         }
         Insert: {
+          avatar_url?: string | null
           bio?: string | null
           color_palette?: Json | null
           created_at?: string | null
@@ -56,6 +151,7 @@ export type Database = {
           weaknesses?: string[] | null
         }
         Update: {
+          avatar_url?: string | null
           bio?: string | null
           color_palette?: Json | null
           created_at?: string | null
@@ -74,6 +170,96 @@ export type Database = {
           user_id?: string
           visibility?: string | null
           weaknesses?: string[] | null
+        }
+        Relationships: []
+      }
+      content_flag_reasons: {
+        Row: {
+          auto_flag_enabled: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          reason_code: string
+          reason_name: string
+          severity: number | null
+        }
+        Insert: {
+          auto_flag_enabled?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason_code: string
+          reason_name: string
+          severity?: number | null
+        }
+        Update: {
+          auto_flag_enabled?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason_code?: string
+          reason_name?: string
+          severity?: number | null
+        }
+        Relationships: []
+      }
+      content_moderation_queue: {
+        Row: {
+          auto_flagged: boolean | null
+          content_id: string
+          content_type: string
+          created_at: string | null
+          flag_reason: string | null
+          flagged_by: string | null
+          flagging_details: Json | null
+          id: string
+          moderated_at: string | null
+          moderator_id: string | null
+          moderator_notes: string | null
+          priority: number | null
+          risk_score: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_flagged?: boolean | null
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          flag_reason?: string | null
+          flagged_by?: string | null
+          flagging_details?: Json | null
+          id?: string
+          moderated_at?: string | null
+          moderator_id?: string | null
+          moderator_notes?: string | null
+          priority?: number | null
+          risk_score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_flagged?: boolean | null
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          flag_reason?: string | null
+          flagged_by?: string | null
+          flagging_details?: Json | null
+          id?: string
+          moderated_at?: string | null
+          moderator_id?: string | null
+          moderator_notes?: string | null
+          priority?: number | null
+          risk_score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -121,43 +307,79 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_flags: Json | null
+          admin_notes: string | null
+          app_role: Database["public"]["Enums"]["app_role"] | null
           avatar_url: string | null
           bio: string | null
           created_at: string | null
           display_name: string | null
+          email: string | null
+          full_name: string | null
+          generations_used: number | null
           handle: string | null
           id: string
+          last_admin_action: string | null
+          last_sign_in: string | null
           plan: string | null
           role_tags: string[] | null
           socials: Json | null
+          subscription_tier: string | null
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
           updated_at: string | null
           visibility: string | null
           website_url: string | null
         }
         Insert: {
+          admin_flags?: Json | null
+          admin_notes?: string | null
+          app_role?: Database["public"]["Enums"]["app_role"] | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
+          email?: string | null
+          full_name?: string | null
+          generations_used?: number | null
           handle?: string | null
           id: string
+          last_admin_action?: string | null
+          last_sign_in?: string | null
           plan?: string | null
           role_tags?: string[] | null
           socials?: Json | null
+          subscription_tier?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           updated_at?: string | null
           visibility?: string | null
           website_url?: string | null
         }
         Update: {
+          admin_flags?: Json | null
+          admin_notes?: string | null
+          app_role?: Database["public"]["Enums"]["app_role"] | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
+          email?: string | null
+          full_name?: string | null
+          generations_used?: number | null
           handle?: string | null
           id?: string
+          last_admin_action?: string | null
+          last_sign_in?: string | null
           plan?: string | null
           role_tags?: string[] | null
           socials?: Json | null
+          subscription_tier?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           updated_at?: string | null
           visibility?: string | null
           website_url?: string | null
@@ -316,6 +538,113 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_user: {
+        Args: {
+          p_activated_by: string
+          p_admin_notes?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      add_admin_notes: {
+        Args: {
+          p_admin_id: string
+          p_notes: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      calculate_content_risk_score: {
+        Args: {
+          p_content_text: string
+          p_content_type: string
+        }
+        Returns: number
+      }
+      change_user_role: {
+        Args: {
+          p_admin_notes?: string
+          p_changed_by: string
+          p_new_role: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      end_admin_session: {
+        Args: {
+          p_session_id?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      flag_content_for_moderation: {
+        Args: {
+          p_auto_flagged?: boolean
+          p_content_id: string
+          p_content_type: string
+          p_flag_reason?: string
+          p_flagged_by?: string
+          p_flagging_details?: Json
+          p_priority?: number
+          p_risk_score?: number
+          p_user_id: string
+        }
+        Returns: string
+      }
+      get_admin_user_list: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_role_filter?: string
+          p_search?: string
+          p_status_filter?: string
+        }
+        Returns: {
+          admin_notes: string | null
+          app_role: string | null
+          content_count: number
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_suspended: boolean | null
+          last_admin_action: string | null
+          last_sign_in: string | null
+          subscription_tier: string | null
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          total_generations: number | null
+        }[]
+      }
+      get_moderation_queue: {
+        Args: {
+          p_content_type?: string
+          p_limit?: number
+          p_offset?: number
+          p_priority_min?: number
+          p_status?: string
+        }
+        Returns: {
+          auto_flagged: boolean | null
+          content_id: string
+          content_type: string
+          created_at: string | null
+          flag_reason: string | null
+          flagged_by: string | null
+          flagging_details: Json | null
+          id: string
+          moderated_at: string | null
+          moderator_id: string | null
+          moderator_notes: string | null
+          priority: number | null
+          risk_score: number | null
+          status: string | null
+          updated_at: string | null
+          user_email: string | null
+          user_id: string
+        }[]
+      }
       get_share_by_token: {
         Args: { _token: string }
         Returns: {
@@ -328,13 +657,81 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_admin_summary: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          admin_notes: string | null
+          app_role: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_suspended: boolean | null
+          last_admin_action: string | null
+          last_sign_in: string | null
+          recent_activity: Json | null
+          subscription_tier: string | null
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          total_brands: number | null
+          total_cvs: number | null
+          total_generations: number | null
+        }[]
+      }
       get_user_tier: {
         Args: { user_id_param: string }
         Returns: Database["public"]["Enums"]["subscription_tier"]
       }
+      is_user_suspended: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      log_admin_action: {
+        Args: {
+          p_action_type: string
+          p_admin_user_id: string
+          p_details?: Json
+          p_ip_address?: string
+          p_target_id?: string
+          p_target_type?: string
+          p_user_agent?: string
+        }
+        Returns: string
+      }
+      moderate_content: {
+        Args: {
+          p_moderator_id: string
+          p_moderator_notes?: string
+          p_queue_id: string
+          p_status: string
+        }
+        Returns: boolean
+      }
+      start_admin_session: {
+        Args: {
+          p_ip_address?: string
+          p_user_agent?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      suspend_user: {
+        Args: {
+          p_admin_notes?: string
+          p_suspended_by: string
+          p_suspension_reason: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "super_admin" | "user"
       subscription_tier: "free" | "pro" | "elite"
     }
     CompositeTypes: {
@@ -463,7 +860,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "super_admin", "user"],
       subscription_tier: ["free", "pro", "elite"],
     },
   },

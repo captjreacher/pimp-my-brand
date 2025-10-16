@@ -6,6 +6,7 @@ import { MilitaryTemplate } from "@/components/templates/MilitaryTemplate";
 import { NFLTemplate } from "@/components/templates/NFLTemplate";
 import { InfluencerTemplate } from "@/components/templates/InfluencerTemplate";
 import { ExecutiveTemplate } from "@/components/templates/ExecutiveTemplate";
+import { getTemplateImage } from "@/lib/images/template-images";
 
 const templateComponents: Record<string, any> = {
   ufc: UFCTemplate,
@@ -73,6 +74,17 @@ export const BrandTemplateRenderer = forwardRef<HTMLDivElement, BrandTemplateRen
     const tagline = brand?.tagline || (parsedRawContext?.tagline as string | undefined);
     const logoUrl = brand?.logo_url || (parsedRawContext?.logo_url as string | undefined);
     const colorPalette = normalizePalette(brand?.color_palette ?? parsedRawContext?.color_palette);
+    
+    // Ensure we have some markdown content
+    const displayMarkdown = markdown || `# ${title}\n\n${tagline || 'No content available yet.'}`;
+    
+    // Get template-appropriate images
+    const avatarImage = formatPreset ? getTemplateImage(
+      formatPreset, 
+      'avatar', 
+      brand?.avatar_url || parsedRawContext?.avatar_url as string | undefined,
+      false
+    ) : null;
 
     const content = TemplateComponent ? (
       <TemplateComponent
@@ -80,7 +92,13 @@ export const BrandTemplateRenderer = forwardRef<HTMLDivElement, BrandTemplateRen
         tagline={tagline}
         logo_url={logoUrl}
         color_palette={colorPalette}
-        markdown={markdown}
+        markdown={displayMarkdown}
+        avatar={avatarImage ? {
+          url: avatarImage.url,
+          alt: avatarImage.alt,
+          mode: brand?.avatar_url ? "personal" : "fictional",
+          showPersonalizationHint: !brand?.avatar_url
+        } : undefined}
       />
     ) : (
       <div className="min-h-screen bg-background py-8">
@@ -110,7 +128,7 @@ export const BrandTemplateRenderer = forwardRef<HTMLDivElement, BrandTemplateRen
             )}
 
             <div className="prose prose-invert max-w-none">
-              <ReactMarkdown>{markdown}</ReactMarkdown>
+              <ReactMarkdown>{displayMarkdown}</ReactMarkdown>
             </div>
 
             <div className="mt-8 pt-6 border-t border-border text-sm text-muted-foreground">

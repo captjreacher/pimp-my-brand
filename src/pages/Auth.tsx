@@ -22,37 +22,67 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
               full_name: fullName,
             },
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}/onboarding`,
           },
         });
 
         if (error) throw error;
 
-        toast({
-          title: "Account created!",
-          description: "You can now sign in with your credentials.",
-        });
-        setIsSignUp(false);
+        // If user is immediately signed in (no email confirmation required)
+        if (data.user && data.session) {
+          toast({
+            title: "Welcome!",
+            description: "Let's get you set up...",
+          });
+          navigate("/onboarding");
+        } else {
+          toast({
+            title: "Account created!",
+            description: "Please check your email to verify your account.",
+          });
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
 
-        toast({
-          title: "Welcome back!",
-          description: "Redirecting to dashboard...",
-        });
-        navigate("/dashboard");
+        // Check if user has completed onboarding by checking if they have content
+        if (data.user) {
+          const [brandsResult, cvsResult, uploadsResult] = await Promise.all([
+            supabase.from('brands').select('id').eq('user_id', data.user.id).limit(1),
+            supabase.from('cvs').select('id').eq('user_id', data.user.id).limit(1),
+            supabase.from('uploads').select('id').eq('user_id', data.user.id).limit(1),
+          ]);
+
+          const hasAnyContent = 
+            (brandsResult.data?.length || 0) > 0 ||
+            (cvsResult.data?.length || 0) > 0 ||
+            (uploadsResult.data?.length || 0) > 0;
+
+          if (hasAnyContent) {
+            toast({
+              title: "Welcome back!",
+              description: "Redirecting to dashboard...",
+            });
+            navigate("/dashboard");
+          } else {
+            toast({
+              title: "Welcome!",
+              description: "Let's get you set up...",
+            });
+            navigate("/onboarding");
+          }
+        }
       }
     } catch (error: any) {
       toast({

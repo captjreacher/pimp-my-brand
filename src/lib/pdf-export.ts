@@ -1,5 +1,5 @@
-const HTML2CANVAS_MODULE_ID = "html2canvas/dist/html2canvas.esm.js" as const;
-const JSPDF_MODULE_ID = "jspdf/dist/jspdf.es.min.js" as const;
+const HTML2CANVAS_MODULE_ID = "html2canvas" as const;
+const JSPDF_MODULE_ID = "jspdf" as const;
 
 type Html2Canvas = typeof import("html2canvas")["default"];
 type JsPDFConstructor = typeof import("jspdf")["jsPDF"];

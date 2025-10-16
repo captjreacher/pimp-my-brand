@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, ExternalLink, Sparkles } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, ExternalLink, Sparkles, Filter, Grid, List } from "lucide-react";
+import { GalleryCard } from "@/components/gallery/GalleryCard";
+import { GalleryItemModal } from "@/components/gallery/GalleryItemModal";
 
 interface Brand {
   id: string;
@@ -13,7 +16,36 @@ interface Brand {
   tagline: string;
   format_preset: string;
   created_at: string;
+  color_palette?: any;
+  fonts?: any;
+  bio?: string;
+  user_id: string;
+  profiles?: {
+    display_name: string;
+    handle: string;
+    avatar_url?: string;
+  };
 }
+
+interface CV {
+  id: string;
+  title: string;
+  summary: string;
+  format_preset: string;
+  created_at: string;
+  experience?: any;
+  skills?: string[];
+  user_id: string;
+  profiles?: {
+    display_name: string;
+    handle: string;
+    avatar_url?: string;
+  };
+}
+
+type GalleryItem = (Brand | CV) & {
+  type: 'brand' | 'cv';
+};
 
 interface TemplateExample {
   id: string;

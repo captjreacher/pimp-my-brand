@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import {
   Loader2,
   Copy,
   Check,
+  FileText,
+  User,
 } from "lucide-react";
 import {
   Dialog,
@@ -31,6 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BrandTemplateRenderer } from "@/components/brand/BrandTemplateRenderer";
+import { CVPreview } from "@/components/brand/CVPreview";
+import { CVEditor } from "@/components/editing/CVEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   loadPdfExportTools,
   PDF_EXPORT_MODULE_ERROR_MESSAGE,
@@ -39,22 +44,21 @@ import {
 export default function BrandView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const cvId = searchParams.get("cv");
   const [brand, setBrand] = useState<any>(null);
+  const [cv, setCV] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("brand");
+  const [editMode, setEditMode] = useState(false);
+
   const [isShareOpen, setIsShareOpen] = useState(false);
-  const [savingEdit, setSavingEdit] = useState(false);
+
   const [shareLoading, setShareLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [shareLink, setShareLink] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    tagline: "",
-    format_preset: "custom",
-    visibility: "private",
-    markdown: "",
-  });
+
   const brandContentRef = useRef<HTMLDivElement>(null);
 
   const parseRawContext = (rawContext: unknown) => {
@@ -79,7 +83,10 @@ export default function BrandView() {
 
   useEffect(() => {
     loadBrand();
-  }, [id]);
+    if (cvId) {
+      loadCV();
+    }
+  }, [id, cvId]);
 
   const loadBrand = async () => {
     try {
@@ -99,14 +106,34 @@ export default function BrandView() {
       toast.error("Failed to load brand");
       navigate("/dashboard");
     } finally {
+      if (!cvId) setLoading(false);
+    }
+  };
+
+  const loadCV = async () => {
+    if (!cvId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("cvs")
+        .select("*")
+        .eq("id", cvId)
+        .single();
+
+      if (error) throw error;
+      setCV(data);
+    } catch (error: any) {
+      console.error("CV load error:", error);
+      toast.error("Failed to load CV");
+    } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-muted">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }
@@ -114,51 +141,7 @@ export default function BrandView() {
   if (!brand) return null;
 
   const markdown = brand.raw_context?.markdown || "# Brand Rider\n\nContent not available.";
-  const editDefaults = () => {
-    setEditForm({
-      title: brand.title || "",
-      tagline: brand.tagline || "",
-      format_preset: brand.format_preset || "custom",
-      visibility: brand.visibility || "private",
-      markdown: brand.raw_context?.markdown || markdown,
-    });
-    setIsEditOpen(true);
-  };
 
-  const handleSaveEdit = async () => {
-    setSavingEdit(true);
-    try {
-      const updatedRawContext = {
-        ...(brand.raw_context || {}),
-        markdown: editForm.markdown,
-      };
-
-      const { data: updatedBrand, error } = await supabase
-        .from("brands")
-        .update({
-          title: editForm.title || null,
-          tagline: editForm.tagline || null,
-          format_preset: editForm.format_preset || null,
-          visibility: editForm.visibility || null,
-          raw_context: updatedRawContext,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", brand.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setBrand(updatedBrand);
-      toast.success("Brand updated");
-      setIsEditOpen(false);
-    } catch (error: any) {
-      console.error("Update error:", error);
-      toast.error(error?.message || "Failed to update brand");
-    } finally {
-      setSavingEdit(false);
-    }
-  };
 
   const handlePrepareShare = async () => {
     setShareLoading(true);
@@ -281,6 +264,30 @@ export default function BrandView() {
     }
   };
 
+  const currentContent = activeTab === "brand" ? brand : cv;
+  const currentTitle = activeTab === "brand" ? "Brand Rider" : "Professional CV";
+
+  const handleCVChange = (updatedCV: any) => {
+    setCV(updatedCV);
+  };
+
+  const handleCVSave = async (updatedCV: any) => {
+    const { error } = await supabase
+      .from("cvs")
+      .update({
+        title: updatedCV.title || null,
+        summary: updatedCV.summary || null,
+        experience: updatedCV.experience || [],
+        skills: updatedCV.skills || [],
+        links: updatedCV.links || [],
+        format_preset: updatedCV.format || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", cv.id);
+
+    if (error) throw error;
+  };
+
   return (
     <div className="min-h-screen">
       {/* Action Bar */}
@@ -292,9 +299,29 @@ export default function BrandView() {
               Back to Dashboard
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={editDefaults}>
+              {cv && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/cv/${cv.id}`)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View CV Separately
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  if (activeTab === "brand") {
+                    navigate(`/brand/${id}/edit`);
+                  } else {
+                    setEditMode(!editMode);
+                  }
+                }}
+              >
                 <Edit className="w-4 h-4 mr-2" />
-                Edit
+                Edit {currentTitle}
               </Button>
               <Button
                 variant="outline"
@@ -327,101 +354,40 @@ export default function BrandView() {
         </div>
       </div>
 
-      <BrandTemplateRenderer ref={brandContentRef} brand={brand} markdown={markdown} />
+      {cv ? (
+        <div className="container mx-auto px-6 py-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="brand" className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Brand Rider
+              </TabsTrigger>
+              <TabsTrigger value="cv" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Professional CV
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="brand">
+              <BrandTemplateRenderer ref={brandContentRef} brand={brand} markdown={markdown} />
+            </TabsContent>
+            <TabsContent value="cv">
+              {editMode ? (
+                <CVEditor 
+                  cv={cv} 
+                  onChange={handleCVChange}
+                  onSave={handleCVSave}
+                />
+              ) : (
+                <CVPreview cv={cv} />
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      ) : (
+        <BrandTemplateRenderer ref={brandContentRef} brand={brand} markdown={markdown} />
+      )}
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Brand</DialogTitle>
-            <DialogDescription>Update your brand details and presentation.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={editForm.title}
-                onChange={(event) =>
-                  setEditForm((prev) => ({ ...prev, title: event.target.value }))
-                }
-                placeholder="Brand title"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tagline">Tagline</Label>
-              <Input
-                id="tagline"
-                value={editForm.tagline}
-                onChange={(event) =>
-                  setEditForm((prev) => ({ ...prev, tagline: event.target.value }))
-                }
-                placeholder="High-impact tagline"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Format preset</Label>
-                <Select
-                  value={editForm.format_preset}
-                  onValueChange={(value) =>
-                    setEditForm((prev) => ({ ...prev, format_preset: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="custom">Custom</SelectItem>
-                    <SelectItem value="ufc">UFC</SelectItem>
-                    <SelectItem value="team">Team Captain</SelectItem>
-                    <SelectItem value="military">Military</SelectItem>
-                    <SelectItem value="nfl">NFL</SelectItem>
-                    <SelectItem value="influencer">Influencer</SelectItem>
-                    <SelectItem value="executive">Executive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Visibility</Label>
-                <Select
-                  value={editForm.visibility}
-                  onValueChange={(value) =>
-                    setEditForm((prev) => ({ ...prev, visibility: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Visibility" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="private">Private</SelectItem>
-                    <SelectItem value="public">Public</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="markdown">Brand Rider Markdown</Label>
-              <Textarea
-                id="markdown"
-                className="h-48"
-                value={editForm.markdown}
-                onChange={(event) =>
-                  setEditForm((prev) => ({ ...prev, markdown: event.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsEditOpen(false)} disabled={savingEdit}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={savingEdit}>
-              {savingEdit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              {savingEdit ? "Saving" : "Save changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
         <DialogContent>

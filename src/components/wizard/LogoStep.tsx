@@ -87,7 +87,7 @@ export function LogoStep({ brandData, onComplete, onSkip }: LogoStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="font-heading text-3xl mb-2">Add Your Logo</h2>
-        <p className="text-muted">
+        <p className="text-muted-foreground">
           Generate with AI, upload your own, or skip this step
         </p>
       </div>

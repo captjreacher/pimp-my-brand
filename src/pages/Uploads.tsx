@@ -261,7 +261,7 @@ const Uploads = () => {
 
                 <TabsContent value="files">
                   <div className="border-2 border-dashed border-border rounded-xl p-6 text-center">
-                    <Upload className="w-12 h-12 mx-auto mb-4 text-muted" />
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                     <label className="cursor-pointer font-medium text-primary hover:text-primary/80">
                       Choose files to upload
                       <Input

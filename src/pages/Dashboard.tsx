@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, LogOut, User, IdCard, ShoppingBag, Image } from "lucide-react";
+import { LogOut, User, Plus } from "lucide-react";
+import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
+import { useDashboardData } from "@/hooks/use-dashboard-data";
 import type { Session } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -10,15 +12,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const { stats } = useDashboardData(session?.user?.id);
+
   useEffect(() => {
-    // Check for session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        navigate("/auth");
-      }
-      setLoading(false);
-    });
+    checkAuthAndOnboarding();
 
     // Listen for auth changes
     const {
@@ -32,6 +29,42 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkAuthAndOnboarding = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      setSession(session);
+
+      // Check if user has completed onboarding by checking if they have any content
+      const [brandsResult, cvsResult, uploadsResult] = await Promise.all([
+        supabase.from('brands').select('id').eq('user_id', session.user.id).limit(1),
+        supabase.from('cvs').select('id').eq('user_id', session.user.id).limit(1),
+        supabase.from('uploads').select('id').eq('user_id', session.user.id).limit(1),
+      ]);
+
+      const hasAnyContent = 
+        (brandsResult.data?.length || 0) > 0 ||
+        (cvsResult.data?.length || 0) > 0 ||
+        (uploadsResult.data?.length || 0) > 0;
+
+      // If user is completely new (no content), redirect to onboarding
+      if (!hasAnyContent) {
+        navigate('/onboarding');
+        return;
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error checking auth and onboarding:', error);
+      navigate("/auth");
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -54,6 +87,15 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <h1 className="font-heading text-2xl font-bold">Brand Generator</h1>
             <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/create")}
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -78,86 +120,28 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-8">
+      <main className="container mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Welcome Message */}
+          <div className="mb-6">
             <h2 className="font-heading text-3xl font-bold mb-2">
               Welcome back, {session?.user?.user_metadata?.full_name || "there"}!
             </h2>
             <p className="text-muted-foreground">
-              Choose an action to get started with your brand generation.
+              Manage your brand materials and create new content.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <DashboardCard
-              icon={<Plus className="w-6 h-6" />}
-              title="Create New Brand"
-              description="Start from scratch with AI-powered generation"
-              onClick={() => navigate("/create")}
-              primary
-            />
-
-            <DashboardCard
-              icon={<Image className="w-6 h-6" />}
-              title="Gallery"
-              description="Browse public brands"
-              onClick={() => navigate("/gallery")}
-            />
-
-            <DashboardCard
-              icon={<IdCard className="w-6 h-6" />}
-              title="Player Profile"
-              description="Dial in your on-stage introductions and accolades"
-              onClick={() => navigate("/player-profile")}
-            />
-
-            <DashboardCard
-              icon={<ShoppingBag className="w-6 h-6" />}
-              title="Shop"
-              description="Outfit templates with uniforms and premium looks"
-              onClick={() => navigate("/shop")}
-            />
-          </div>
+          {/* Dashboard Tabs */}
+          {session?.user?.id && (
+            <DashboardTabs userId={session.user.id} />
+          )}
         </div>
       </main>
     </div>
   );
 };
 
-interface DashboardCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-  primary?: boolean;
-}
 
-const DashboardCard = ({
-  icon,
-  title,
-  description,
-  onClick,
-  primary,
-}: DashboardCardProps) => (
-  <button
-    onClick={onClick}
-    className={`gradient-card border rounded-2xl p-6 text-left hover:shadow-soft transition-all ${
-      primary
-        ? "border-primary/50 shadow-glow"
-        : "border-border"
-    }`}
-  >
-    <div
-      className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-        primary ? "bg-primary/20 text-primary" : "bg-surface text-secondary"
-      }`}
-    >
-      {icon}
-    </div>
-    <h3 className="font-heading text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground text-sm">{description}</p>
-  </button>
-);
 
 export default Dashboard;
