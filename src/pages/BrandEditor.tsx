@@ -72,7 +72,8 @@ export default function BrandEditor() {
     signature_phrases: [] as string[],
     color_palette: null,
     fonts: null,
-    logo_url: ""
+    logo_url: "",
+    avatar_url: ""
   });
 
   useEffect(() => {
@@ -80,6 +81,14 @@ export default function BrandEditor() {
       fetchBrand();
     }
   }, [id]);
+
+  // Regenerate markdown when form data changes
+  useEffect(() => {
+    if (brand) {
+      const updatedBrand = { ...brand, ...formData };
+      generateMarkdown(updatedBrand);
+    }
+  }, [formData.title, formData.tagline, formData.bio, formData.format_preset]);
 
   const fetchBrand = async () => {
     if (!id) return;
@@ -107,7 +116,8 @@ export default function BrandEditor() {
         signature_phrases: data.signature_phrases || [],
         color_palette: data.color_palette,
         fonts: data.fonts,
-        logo_url: data.logo_url || ""
+        logo_url: data.logo_url || "",
+        avatar_url: data.avatar_url || ""
       });
 
       // Generate markdown for preview
@@ -135,10 +145,42 @@ export default function BrandEditor() {
       });
 
       if (error) throw error;
-      setMarkdown(data.markdown || "");
+      setMarkdown(data?.markdown || generateFallbackMarkdown(brandData));
     } catch (error) {
       console.error("Error generating markdown:", error);
+      // Use fallback markdown if the function fails
+      setMarkdown(generateFallbackMarkdown(brandData));
     }
+  };
+
+  const generateFallbackMarkdown = (brandData: Brand) => {
+    const sections = [];
+    
+    if (brandData.title) {
+      sections.push(`# ${brandData.title}`);
+    }
+    
+    if (brandData.tagline) {
+      sections.push(`*${brandData.tagline}*`);
+    }
+    
+    if (brandData.bio) {
+      sections.push(`## About\n\n${brandData.bio}`);
+    }
+    
+    if (brandData.strengths && brandData.strengths.length > 0) {
+      sections.push(`## Strengths\n\n${brandData.strengths.map(s => `- ${s}`).join('\n')}`);
+    }
+    
+    if (brandData.signature_phrases && brandData.signature_phrases.length > 0) {
+      sections.push(`## Key Messages\n\n${brandData.signature_phrases.map(p => `> "${p}"`).join('\n\n')}`);
+    }
+    
+    if (brandData.tone_notes) {
+      sections.push(`## Voice & Tone\n\n${brandData.tone_notes}`);
+    }
+    
+    return sections.join('\n\n');
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -185,6 +227,7 @@ export default function BrandEditor() {
           weaknesses: formData.weaknesses,
           signature_phrases: formData.signature_phrases,
           logo_url: formData.logo_url,
+          avatar_url: formData.avatar_url,
           updated_at: new Date().toISOString()
         })
         .eq("id", id);
@@ -510,6 +553,31 @@ export default function BrandEditor() {
                         />
                       </div>
                     )}
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="avatar_url">Avatar/Profile Image URL</Label>
+                      <Input
+                        id="avatar_url"
+                        value={formData.avatar_url || ''}
+                        onChange={(e) => handleInputChange('avatar_url', e.target.value)}
+                        placeholder="https://example.com/avatar.jpg"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Add your profile photo to personalize the template. Leave empty to use template defaults.
+                      </p>
+                    </div>
+                    {formData.avatar_url && (
+                      <div className="border rounded-lg p-4 bg-muted/50">
+                        <img 
+                          src={formData.avatar_url} 
+                          alt="Profile avatar" 
+                          className="max-h-32 mx-auto rounded-lg"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -600,17 +668,17 @@ export default function BrandEditor() {
               </p>
             </div>
             <div className="h-full overflow-y-auto p-6">
-              {markdown && brand ? (
+              {brand ? (
                 <BrandTemplateRenderer 
                   ref={brandContentRef} 
                   brand={{...brand, ...formData}} 
-                  markdown={markdown} 
+                  markdown={markdown || generateFallbackMarkdown({...brand, ...formData})} 
                 />
               ) : (
                 <div className="flex items-center justify-center h-64">
                   <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">Generating preview...</p>
+                    <p className="text-muted-foreground">Loading brand data...</p>
                   </div>
                 </div>
               )}

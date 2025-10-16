@@ -4,28 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Plus } from "lucide-react";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
-import { UserOnboarding } from "@/components/dashboard/UserOnboarding";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import type { Session } from "@supabase/supabase-js";
 
 const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(true);
   const navigate = useNavigate();
 
   const { stats } = useDashboardData(session?.user?.id);
-  const hasContent = (stats?.totalBrands || 0) + (stats?.totalCVs || 0) + (stats?.totalUploads || 0) > 0;
 
   useEffect(() => {
-    // Check for session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        navigate("/auth");
-      }
-      setLoading(false);
-    });
+    checkAuthAndOnboarding();
 
     // Listen for auth changes
     const {
@@ -39,6 +29,42 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkAuthAndOnboarding = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+
+      setSession(session);
+
+      // Check if user has completed onboarding by checking if they have any content
+      const [brandsResult, cvsResult, uploadsResult] = await Promise.all([
+        supabase.from('brands').select('id').eq('user_id', session.user.id).limit(1),
+        supabase.from('cvs').select('id').eq('user_id', session.user.id).limit(1),
+        supabase.from('uploads').select('id').eq('user_id', session.user.id).limit(1),
+      ]);
+
+      const hasAnyContent = 
+        (brandsResult.data?.length || 0) > 0 ||
+        (cvsResult.data?.length || 0) > 0 ||
+        (uploadsResult.data?.length || 0) > 0;
+
+      // If user is completely new (no content), redirect to onboarding
+      if (!hasAnyContent) {
+        navigate('/onboarding');
+        return;
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error checking auth and onboarding:', error);
+      navigate("/auth");
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -105,15 +131,6 @@ const Dashboard = () => {
               Manage your brand materials and create new content.
             </p>
           </div>
-
-          {/* Onboarding for new users */}
-          {session?.user?.id && showOnboarding && (
-            <UserOnboarding
-              userId={session.user.id}
-              hasContent={hasContent}
-              onDismiss={() => setShowOnboarding(false)}
-            />
-          )}
 
           {/* Dashboard Tabs */}
           {session?.user?.id && (

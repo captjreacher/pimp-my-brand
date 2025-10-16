@@ -20,7 +20,8 @@ import {
   Globe,
   Lock,
   BarChart3,
-  Tag
+  Tag,
+  FileText
 } from 'lucide-react';
 import { BulkActions } from './BulkActions';
 import { ContentAnalytics } from './ContentAnalytics';
@@ -32,6 +33,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
@@ -111,6 +122,13 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
           navigate(`/brand/${item.id}/edit`);
         } else if (type === 'cvs') {
           navigate(`/cv/${item.id}/edit`);
+        }
+        break;
+      case 'generateCV':
+        if (type === 'brands') {
+          console.log('Navigating to generate CV for brand:', item.id);
+          // Navigate to a dedicated CV generation page with brand context
+          navigate(`/brand/${item.id}/generate-cv`);
         }
         break;
       case 'duplicate':
@@ -218,15 +236,24 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
             </div>
           </div>
 
-          {/* Bulk Actions */}
-          <BulkActions
-            selectedItems={selectedItems}
-            totalItems={filteredItems.length}
-            contentType={type}
-            onSelectAll={handleSelectAll}
-            onClearSelection={() => setSelectedItems([])}
-            onBulkAction={handleBulkAction}
-          />
+          {/* Single Item Actions or Bulk Actions */}
+          {selectedItems.length === 1 ? (
+            <SingleItemActions
+              item={filteredItems.find(item => item.id === selectedItems[0])}
+              contentType={type}
+              onAction={handleAction}
+              onClearSelection={() => setSelectedItems([])}
+            />
+          ) : (
+            <BulkActions
+              selectedItems={selectedItems}
+              totalItems={filteredItems.length}
+              contentType={type}
+              onSelectAll={handleSelectAll}
+              onClearSelection={() => setSelectedItems([])}
+              onBulkAction={handleBulkAction}
+            />
+          )}
 
           {/* Content Grid */}
           {filteredItems.length === 0 ? (
@@ -424,29 +451,310 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
         </div>
         
         {type !== 'uploads' && (
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 space-y-2">
+            {/* Primary Actions */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => onAction('view', item)}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                View
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => onAction('edit', item)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              {type === 'brands' && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => onAction('generateCV', item)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  CV
+                </Button>
+              )}
+            </div>
+            
+            {/* Quick Actions - shown on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => onAction('share', item)}
+              >
+                <Share className="w-3 h-3 mr-1" />
+                Share
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => onAction('duplicate', item)}
+              >
+                <Copy className="w-3 h-3 mr-1" />
+                Copy
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => onAction('download', item)}
+              >
+                <Download className="w-3 h-3 mr-1" />
+                Export
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {type === 'uploads' && (
+          <div className="mt-3">
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
-              onClick={() => onAction('view', item)}
+              className="w-full"
+              onClick={() => onAction('download', item)}
             >
-              <Eye className="w-4 h-4 mr-2" />
-              View
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => onAction('edit', item)}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
+              <Download className="w-4 h-4 mr-2" />
+              Download
             </Button>
           </div>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+interface SingleItemActionsProps {
+  item: any;
+  contentType: 'brands' | 'cvs' | 'uploads';
+  onAction: (action: string, item: any) => void;
+  onClearSelection: () => void;
+}
+
+function SingleItemActions({ item, contentType, onAction, onClearSelection }: SingleItemActionsProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  if (!item) return null;
+
+  const getTitle = () => {
+    if (contentType === 'uploads') return item.original_name;
+    return item.title || `Untitled ${contentType.slice(0, -1)}`;
+  };
+
+  const getPrimaryActions = () => {
+    console.log('getPrimaryActions called with contentType:', contentType);
+    
+    if (contentType === 'uploads') {
+      return [
+        { key: 'download', label: 'Download', icon: Download, variant: 'default' as const },
+      ];
+    }
+
+    if (contentType === 'brands') {
+      console.log('Returning brand actions including Generate CV');
+      return [
+        { key: 'view', label: 'View', icon: Eye, variant: 'default' as const },
+        { key: 'edit', label: 'Edit', icon: Edit, variant: 'outline' as const },
+        { key: 'generateCV', label: 'Generate CV', icon: FileText, variant: 'outline' as const },
+      ];
+    }
+
+    return [
+      { key: 'view', label: 'View', icon: Eye, variant: 'default' as const },
+      { key: 'edit', label: 'Edit', icon: Edit, variant: 'outline' as const },
+    ];
+  };
+
+  const getSecondaryActions = () => {
+    const actions: Array<{ key: string; label: string; icon: any; destructive?: boolean }> = [
+      { key: 'duplicate', label: 'Duplicate', icon: Copy },
+    ];
+
+    if (contentType !== 'uploads') {
+      actions.push(
+        { key: 'share', label: 'Share', icon: Share },
+        { key: 'download', label: 'Export PDF', icon: Download }
+      );
+    }
+
+    actions.push(
+      { key: 'delete', label: 'Delete', icon: Trash2, destructive: true }
+    );
+
+    return actions;
+  };
+
+  const handleAction = async (action: string) => {
+    console.log('SingleItemActions handleAction called with:', action, item);
+    
+    if (action === 'delete') {
+      setShowDeleteDialog(true);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onAction(action, item);
+      
+      if (['duplicate', 'share', 'download'].includes(action)) {
+        // Don't clear selection for these actions
+      } else {
+        onClearSelection();
+      }
+    } catch (error) {
+      toast.error(`Failed to ${action} ${contentType.slice(0, -1)}. Please try again.`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsProcessing(true);
+    try {
+      await onAction('delete', item);
+      onClearSelection();
+    } catch (error) {
+      toast.error(`Failed to delete ${contentType.slice(0, -1)}. Please try again.`);
+    } finally {
+      setIsProcessing(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              {contentType === 'brands' && <BarChart3 className="w-5 h-5 text-primary" />}
+              {contentType === 'cvs' && <Eye className="w-5 h-5 text-primary" />}
+              {contentType === 'uploads' && <Download className="w-5 h-5 text-primary" />}
+            </div>
+            <div>
+              <h3 className="font-medium text-sm">{getTitle()}</h3>
+              <p className="text-xs text-muted-foreground line-clamp-1">
+                {contentType === 'brands' && item.tagline}
+                {contentType === 'cvs' && item.summary}
+                {contentType === 'uploads' && `${item.mime_type} • ${formatFileSize(item.size_bytes)}`}
+              </p>
+              {contentType === 'brands' && (
+                <div className="flex items-center gap-2 mt-1">
+                  {item.format_preset && (
+                    <Badge variant="outline" className="text-xs px-1 py-0">
+                      {item.format_preset.toUpperCase()}
+                    </Badge>
+                  )}
+                  {item.visibility && (
+                    <Badge variant="secondary" className="text-xs px-1 py-0">
+                      {item.visibility === 'public' ? 'Public' : 'Private'}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <Badge variant="secondary" className="text-xs">
+            1 selected
+          </Badge>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Primary Actions */}
+          {getPrimaryActions().map((action) => (
+            <Button
+              key={action.key}
+              variant={action.variant}
+              size="sm"
+              onClick={() => {
+                console.log('Button clicked:', action.key);
+                handleAction(action.key);
+              }}
+              disabled={isProcessing}
+              className="gap-2"
+            >
+              <action.icon className="w-4 h-4" />
+              {action.label}
+            </Button>
+          ))}
+
+          {/* Secondary Actions Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isProcessing}
+                className="gap-2"
+              >
+                More
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {getSecondaryActions().map((action, index) => (
+                <div key={action.key}>
+                  {action.destructive && index > 0 && <DropdownMenuSeparator />}
+                  <DropdownMenuItem
+                    onClick={() => handleAction(action.key)}
+                    className={action.destructive ? 'text-destructive' : ''}
+                    disabled={isProcessing}
+                  >
+                    <action.icon className="w-4 h-4 mr-2" />
+                    {action.label}
+                  </DropdownMenuItem>
+                </div>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearSelection}
+            disabled={isProcessing}
+          >
+            Clear
+          </Button>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {getTitle()}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this {contentType.slice(0, -1)} and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isProcessing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isProcessing ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

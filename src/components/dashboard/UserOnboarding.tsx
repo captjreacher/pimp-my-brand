@@ -94,10 +94,12 @@ export function UserOnboarding({ userId, hasContent, onDismiss }: UserOnboarding
         {
           id: 'cv',
           title: 'Generate Your CV',
-          description: 'Create a professional CV from your brand analysis',
+          description: hasBrands 
+            ? 'Create a professional CV using your brand style and additional documents'
+            : 'Create a professional CV from your brand analysis (requires a brand first)',
           icon: <IdCard className="w-5 h-5" />,
-          action: 'Generate CV',
-          path: '/create',
+          action: hasBrands ? 'Generate CV' : 'Create brand first',
+          path: '/dashboard',
           completed: hasCVs,
         },
       ];
@@ -117,8 +119,42 @@ export function UserOnboarding({ userId, hasContent, onDismiss }: UserOnboarding
   const totalSteps = steps.length;
   const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
 
-  const handleStepAction = (step: OnboardingStep) => {
-    navigate(step.path);
+  const handleStepAction = async (step: OnboardingStep) => {
+    if (step.id === 'cv') {
+      // For CV generation, check if user has brands first
+      const hasBrands = steps.find(s => s.id === 'brand')?.completed;
+      if (hasBrands) {
+        // Get the user's first brand and navigate directly to CV generation
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: brands } = await supabase
+              .from('brands')
+              .select('id')
+              .eq('user_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(1);
+            
+            if (brands && brands.length > 0) {
+              // Navigate directly to CV generation for the most recent brand
+              navigate(`/brand/${brands[0].id}/generate-cv`);
+            } else {
+              // Fallback to brands tab
+              navigate('/dashboard?tab=brands');
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching brands:', error);
+          // Fallback to brands tab
+          navigate('/dashboard?tab=brands');
+        }
+      } else {
+        // Need to create a brand first
+        navigate('/create');
+      }
+    } else {
+      navigate(step.path);
+    }
   };
 
   const handleDismiss = () => {
