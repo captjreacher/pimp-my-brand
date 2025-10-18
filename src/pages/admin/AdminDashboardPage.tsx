@@ -5,6 +5,9 @@ import { useAdminErrorHandler } from '@/hooks/use-admin-error-handler';
 import { useOptimizedAdminData, useAdminRealTimeSync } from '@/hooks/use-admin-performance';
 import { useAdmin } from '@/contexts/AdminContext';
 import { adminIntegrationService } from '@/lib/admin/integration-service-stub';
+import { userManagementService } from '@/lib/admin/user-management-service';
+import { adminAnalyticsService } from '@/lib/admin/analytics-service';
+import { moderationService } from '@/lib/admin/moderation-service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,15 +40,34 @@ export default function AdminDashboardPage() {
     refetch: refetchStats,
   } = useOptimizedAdminData(
     async () => {
-      // In a real app, this would be an API call
-      return {
-        totalUsers: 1247,
-        activeUsers: 892,
-        pendingModeration: 12,
-        monthlyRevenue: 15420,
-        systemHealth: 98.5,
-        recentSignups: 23,
-      };
+      try {
+        // Fetch real data from services
+        const [userStats, moderationStats, analyticsData] = await Promise.all([
+          userManagementService.getUserStats(),
+          moderationService.getModerationStats(),
+          adminAnalyticsService.getSystemMetrics()
+        ]);
+
+        return {
+          totalUsers: userStats?.total_users || 0,
+          activeUsers: userStats?.active_users || 0,
+          pendingModeration: moderationStats?.pending_count || 0,
+          monthlyRevenue: 0, // Will be implemented when billing is connected
+          systemHealth: 100, // SystemMetrics doesn't have uptime_percentage, using default
+          recentSignups: userStats?.new_users_this_week || 0,
+        };
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        // Return zeros on error
+        return {
+          totalUsers: 0,
+          activeUsers: 0,
+          pendingModeration: 0,
+          monthlyRevenue: 0,
+          systemHealth: 100,
+          recentSignups: 0,
+        };
+      }
     },
     [],
     {
@@ -55,45 +77,18 @@ export default function AdminDashboardPage() {
     }
   );
 
-  // Real-time activity sync
+  // Real-time activity sync - using empty array for now since we don't have activity logs yet
   const { data: recentActivity } = useAdminRealTimeSync(
-    [
-      {
-        id: '1',
-        type: 'user_signup',
-        message: 'New user registered: john.doe@example.com',
-        timestamp: '2 minutes ago',
-        icon: Users,
-        variant: 'success' as const,
-      },
-      {
-        id: '2',
-        type: 'content_flagged',
-        message: 'Content flagged for review: Brand "Tech Startup"',
-        timestamp: '5 minutes ago',
-        icon: Flag,
-        variant: 'warning' as const,
-      },
-      {
-        id: '3',
-        type: 'payment_success',
-        message: 'Payment processed: $29.99 from user@example.com',
-        timestamp: '8 minutes ago',
-        icon: CreditCard,
-        variant: 'success' as const,
-      },
-      {
-        id: '4',
-        type: 'system_alert',
-        message: 'High API usage detected - monitoring',
-        timestamp: '12 minutes ago',
-        icon: AlertTriangle,
-        variant: 'warning' as const,
-      },
-    ],
+    [], // No hardcoded data
     async () => {
-      // In a real app, this would fetch recent activity from API
-      return [];
+      try {
+        // In the future, this would fetch real activity from audit logs
+        // For now, return empty array since we don't have activity logs yet
+        return [];
+      } catch (error) {
+        console.error('Error fetching recent activity:', error);
+        return [];
+      }
     },
     {
       interval: 15000, // 15 seconds
@@ -353,17 +348,25 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3">
-                    <div className={`p-1 rounded-full ${getVariantColor(activity.variant)}`}>
-                      <activity.icon className="h-4 w-4" />
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3">
+                      <div className={`p-1 rounded-full ${getVariantColor(activity.variant)}`}>
+                        <activity.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{activity.message}</p>
+                        <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{activity.message}</p>
-                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No recent activity</p>
+                    <p className="text-xs">Activity will appear here as users interact with the platform</p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>

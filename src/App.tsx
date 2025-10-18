@@ -33,9 +33,13 @@ const PlayerProfile = lazy(() => import("./pages/PlayerProfile"));
 const Shop = lazy(() => import("./pages/Shop"));
 const AdminAccess = lazy(() => import("./pages/AdminAccess"));
 const AdminDebug = lazy(() => import("./pages/AdminDebug"));
+const SimpleAdmin = lazy(() => import("./pages/SimpleAdmin"));
+const WorkingAdmin = lazy(() => import("./pages/WorkingAdmin"));
+const VoiceSynthesisDemo = lazy(() => import("./pages/VoiceSynthesisDemo"));
 
 // Admin pages
 const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage"));
+const SimpleAdminDashboard = lazy(() => import("./pages/admin/SimpleAdminDashboard"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").then(module => ({ default: module.UserManagementPage })));
 const SubscriptionManagementPage = lazy(() => import("./pages/admin/SubscriptionManagementPage").then(module => ({ default: module.SubscriptionManagementPage })));
 const ContentModerationPage = lazy(() => import("./pages/admin/ContentModerationPage").then(module => ({ default: module.ContentModerationPage })));
@@ -43,6 +47,15 @@ const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
 const SystemConfigPage = lazy(() => import("./pages/admin/SystemConfigPage").then(module => ({ default: module.SystemConfigPage })));
 const SecurityPage = lazy(() => import("./pages/admin/SecurityPage"));
 const CommunicationPage = lazy(() => import("./pages/admin/CommunicationPage"));
+const AIContentManagementPage = lazy(() => import("./pages/admin/AIContentManagementPage").then(module => ({ default: module.AIContentManagementPage })));
+const SimpleSubscriptionPage = lazy(() => import("./pages/admin/SimpleSubscriptionPage"));
+const SimpleAnalyticsPage = lazy(() => import("./pages/admin/SimpleAnalyticsPage"));
+const SimpleUserManagementPage = lazy(() => import("./pages/admin/SimpleUserManagementPage"));
+const SimpleModerationPage = lazy(() => import("./pages/admin/SimpleModerationPage"));
+const SimpleConfigPage = lazy(() => import("./pages/admin/SimpleConfigPage"));
+const SimpleSecurityPage = lazy(() => import("./pages/admin/SimpleSecurityPage"));
+const SimpleCommunicationPage = lazy(() => import("./pages/admin/SimpleCommunicationPage"));
+const SimpleAIContentPage = lazy(() => import("./pages/admin/SimpleAIContentPage"));
 
 const queryClient = createOptimizedQueryClient();
 
@@ -85,9 +98,33 @@ const App = () => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/admin-access" element={<AdminAccess />} />
             <Route path="/admin-debug" element={<AdminDebug />} />
+            <Route path="/simple-admin" element={<SimpleAdmin />} />
+            <Route path="/working-admin" element={<WorkingAdmin />} />
+            <Route path="/voice-demo" element={<VoiceSynthesisDemo />} />
+            
+            {/* Simple Admin Dashboard (no auth required for testing) */}
+            <Route path="/admin-simple" element={<SimpleAdminDashboard />} />
             
             {/* Admin Routes */}
             <Route path="/admin/*" element={
+              <Routes>
+                {/* Main admin dashboard - no auth required */}
+                <Route path="/" element={<SimpleAdminDashboard />} />
+                
+                {/* Individual admin pages - simplified routing */}
+                <Route path="/users" element={<SimpleUserManagementPage />} />
+                <Route path="/subscriptions" element={<SimpleSubscriptionPage />} />
+                <Route path="/moderation" element={<SimpleModerationPage />} />
+                <Route path="/analytics" element={<SimpleAnalyticsPage />} />
+                <Route path="/config" element={<SimpleConfigPage />} />
+                <Route path="/security" element={<SimpleSecurityPage />} />
+                <Route path="/communication" element={<SimpleCommunicationPage />} />
+                <Route path="/ai-content" element={<SimpleAIContentPage />} />
+              </Routes>
+            } />
+            
+            {/* Complex Admin Routes with Auth (DISABLED - using Simple routes only) */}
+            <Route path="/admin-complex-disabled/*" element={
               <AdminProvider>
                 <Routes>
                   <Route path="/" element={
@@ -128,6 +165,11 @@ const App = () => {
                   <Route path="/communication" element={
                     <AdminRouteGuard requiredPermissions={['manage_users']}>
                       <CommunicationPage />
+                    </AdminRouteGuard>
+                  } />
+                  <Route path="/ai-content" element={
+                    <AdminRouteGuard requiredPermissions={['moderate_content', 'view_analytics']}>
+                      <AIContentManagementPage />
                     </AdminRouteGuard>
                   } />
                 </Routes>

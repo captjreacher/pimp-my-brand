@@ -48,25 +48,8 @@ export function SubscriptionDetailsModal({
   onRefresh,
 }: SubscriptionDetailsModalProps) {
   const [billingHistory] = useState<BillingHistoryItem[]>([
-    // Mock data - in real implementation, this would be fetched
-    {
-      id: 'in_1234567890',
-      amount: 2900,
-      currency: 'usd',
-      status: 'paid',
-      created: '2024-01-15T10:00:00Z',
-      description: 'Pro subscription',
-      invoice_url: 'https://invoice.stripe.com/i/acct_123/test_456',
-    },
-    {
-      id: 'in_0987654321',
-      amount: 2900,
-      currency: 'usd',
-      status: 'paid',
-      created: '2023-12-15T10:00:00Z',
-      description: 'Pro subscription',
-      invoice_url: 'https://invoice.stripe.com/i/acct_123/test_789',
-    },
+    // Real billing history would be fetched from Stripe/database
+    // For now showing empty until Stripe integration is complete
   ]);
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {

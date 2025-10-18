@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Connection</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Admin Dashboard Connection Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Your Supabase credentials
+        const supabaseUrl = 'https://qnvihygrnfgpmsznayje.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFudmloeWdybmZncG1zem5heWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MzU4OTksImV4cCI6MjA3NjIxMTg5OX0.uA3phIwQxs26Upfw4EKPzxP3VxKqzLV4Dm9cx7nGZdw';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        async function testConnection() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>🔍 Testing connection...</p>';
+            
+            try {
+                // Test profiles access
+                const { data: profiles, error } = await supabase
+                    .from('profiles')
+                    .select('id, email, full_name, app_role')
+                    .limit(5);
+                
+                if (error) {
+                    results.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+                    results.innerHTML += '<p>RLS is likely still enabled. Run the SQL script first.</p>';
+                    return;
+                }
+                
+                results.innerHTML += `<p>✅ Found ${profiles.length} users</p>`;
+                
+                // Show users
+                profiles.forEach(user => {
+                    results.innerHTML += `<p>- ${user.email} (${user.app_role || 'user'})</p>`;
+                });
+                
+                // Check admin users
+                const adminUsers = profiles.filter(p => 
+                    ['admin', 'super_admin', 'moderator'].includes(p.app_role)
+                );
+                
+                if (adminUsers.length > 0) {
+                    results.innerHTML += `<p>🎉 SUCCESS! Found ${adminUsers.length} admin users</p>`;
+                    results.innerHTML += '<p>Your admin dashboard should now show real data!</p>';
+                } else {
+                    results.innerHTML += '<p>⚠️ No admin users found. Run the SQL script to make yourself admin.</p>';
+                }
+                
+            } catch (err) {
+                results.innerHTML += `<p>❌ Connection failed: ${err.message}</p>`;
+            }
+        }
+        
+        // Run test on page load
+        testConnection();
+    </script>
+</body>
+</html>

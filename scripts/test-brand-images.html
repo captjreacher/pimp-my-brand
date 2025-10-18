@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Brand Images</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: white; }
+        .image-test { margin: 20px 0; padding: 20px; border: 1px solid #333; border-radius: 8px; }
+        .image-test img { max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; }
+        .status { padding: 5px 10px; border-radius: 4px; font-size: 12px; margin-left: 10px; }
+        .success { background: #059669; }
+        .error { background: #DC2626; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Brand Template Image Test</h1>
+    <p>Testing if template images load correctly...</p>
+
+    <div class="image-test">
+        <h3>UFC Fighter Avatar</h3>
+        <img src="https://images.unsplash.com/photo-1549451371-64aa98a6f660?auto=format&fit=crop&w=640&q=80" 
+             alt="UFC Fighter" 
+             onload="showStatus(this, 'success')" 
+             onerror="showStatus(this, 'error')">
+        <span class="status" id="status-1">Loading...</span>
+    </div>
+
+    <div class="image-test">
+        <h3>Team Player Avatar</h3>
+        <img src="https://images.unsplash.com/photo-1546525848-3ce03ca516f6?auto=format&fit=crop&w=640&q=80" 
+             alt="Team Player" 
+             onload="showStatus(this, 'success')" 
+             onerror="showStatus(this, 'error')">
+        <span class="status" id="status-2">Loading...</span>
+    </div>
+
+    <div class="image-test">
+        <h3>Executive Portrait</h3>
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=640&q=80" 
+             alt="Executive" 
+             onload="showStatus(this, 'success')" 
+             onerror="showStatus(this, 'error')">
+        <span class="status" id="status-3">Loading...</span>
+    </div>
+
+    <div class="image-test">
+        <h3>Fallback SVG Avatar</h3>
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgdmlld0JveD0iMCAwIDY0MCA2NDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiBmaWxsPSIjMUYyOTM3Ii8+CjxjaXJjbGUgY3g9IjMyMCIgY3k9IjI0MCIgcj0iODAiIGZpbGw9IiNEQzI2MjYiLz4KPHJlY3QgeD0iMjQwIiB5PSIzNjAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjAwIiByeD0iMjAiIGZpbGw9IiNEQzI2MjYiLz4KPHRleHQgeD0iMzIwIiB5PSI1MDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GSUdIVEVSPC90ZXh0Pgo8L3N2Zz4K" 
+             alt="Fallback Fighter" 
+             onload="showStatus(this, 'success')" 
+             onerror="showStatus(this, 'error')">
+        <span class="status" id="status-4">Loading...</span>
+    </div>
+
+    <script>
+        let statusCounter = 1;
+        function showStatus(img, type) {
+            const statusEl = img.nextElementSibling;
+            statusEl.textContent = type === 'success' ? '✅ Loaded' : '❌ Failed';
+            statusEl.className = `status ${type}`;
+        }
+    </script>
+</body>
+</html>

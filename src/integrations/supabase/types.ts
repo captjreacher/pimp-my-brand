@@ -107,6 +107,129 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_generation_requests: {
+        Row: {
+          cost_cents: number | null
+          created_at: string | null
+          error_message: string | null
+          feature: Database["public"]["Enums"]["ai_feature_type"]
+          id: string
+          options: Json | null
+          processing_time_ms: number | null
+          prompt: string | null
+          provider: string
+          result_url: string | null
+          status: Database["public"]["Enums"]["generation_status"] | null
+          user_id: string | null
+        }
+        Insert: {
+          cost_cents?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          feature: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          options?: Json | null
+          processing_time_ms?: number | null
+          prompt?: string | null
+          provider: string
+          result_url?: string | null
+          status?: Database["public"]["Enums"]["generation_status"] | null
+          user_id?: string | null
+        }
+        Update: {
+          cost_cents?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          feature?: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          options?: Json | null
+          processing_time_ms?: number | null
+          prompt?: string | null
+          provider?: string
+          result_url?: string | null
+          status?: Database["public"]["Enums"]["generation_status"] | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          html_content: string
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          placeholders: Json | null
+          style_sheet: string | null
+          type: Database["public"]["Enums"]["template_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          placeholders?: Json | null
+          style_sheet?: string | null
+          type: Database["public"]["Enums"]["template_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          placeholders?: Json | null
+          style_sheet?: string | null
+          type?: Database["public"]["Enums"]["template_type"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ai_usage_tracking: {
+        Row: {
+          created_at: string | null
+          feature: Database["public"]["Enums"]["ai_feature_type"]
+          id: string
+          period_end: string
+          period_start: string
+          subscription_tier: string | null
+          total_cost_cents: number | null
+          usage_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          period_end: string
+          period_start: string
+          subscription_tier?: string | null
+          total_cost_cents?: number | null
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature?: Database["public"]["Enums"]["ai_feature_type"]
+          id?: string
+          period_end?: string
+          period_start?: string
+          subscription_tier?: string | null
+          total_cost_cents?: number | null
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           avatar_url: string | null
@@ -497,6 +620,78 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_assets: {
+        Row: {
+          asset_type: Database["public"]["Enums"]["asset_type"]
+          created_at: string | null
+          generation_request_id: string | null
+          id: string
+          is_public: boolean | null
+          metadata: Json | null
+          moderation_status: Database["public"]["Enums"]["moderation_status"] | null
+          storage_path: string
+          user_id: string | null
+        }
+        Insert: {
+          asset_type: Database["public"]["Enums"]["asset_type"]
+          created_at?: string | null
+          generation_request_id?: string | null
+          id?: string
+          is_public?: boolean | null
+          metadata?: Json | null
+          moderation_status?: Database["public"]["Enums"]["moderation_status"] | null
+          storage_path: string
+          user_id?: string | null
+        }
+        Update: {
+          asset_type?: Database["public"]["Enums"]["asset_type"]
+          created_at?: string | null
+          generation_request_id?: string | null
+          id?: string
+          is_public?: boolean | null
+          metadata?: Json | null
+          moderation_status?: Database["public"]["Enums"]["moderation_status"] | null
+          storage_path?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      placeholder_images: {
+        Row: {
+          ai_generated: boolean | null
+          category: Database["public"]["Enums"]["image_category"]
+          created_at: string | null
+          filename: string
+          generation_prompt: string | null
+          id: string
+          metadata: Json | null
+          storage_path: string
+          tags: string[] | null
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          category: Database["public"]["Enums"]["image_category"]
+          created_at?: string | null
+          filename: string
+          generation_prompt?: string | null
+          id?: string
+          metadata?: Json | null
+          storage_path: string
+          tags?: string[] | null
+        }
+        Update: {
+          ai_generated?: boolean | null
+          category?: Database["public"]["Enums"]["image_category"]
+          created_at?: string | null
+          filename?: string
+          generation_prompt?: string | null
+          id?: string
+          metadata?: Json | null
+          storage_path?: string
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
       uploads: {
         Row: {
           created_at: string | null
@@ -731,8 +926,14 @@ export type Database = {
       }
     }
     Enums: {
+      ai_feature_type: "image_generation" | "voice_synthesis" | "video_generation" | "advanced_editing"
       app_role: "admin" | "moderator" | "super_admin" | "user"
+      asset_type: "image" | "audio" | "video" | "document"
+      generation_status: "pending" | "processing" | "completed" | "failed" | "cancelled"
+      image_category: "avatars" | "backgrounds" | "logos" | "icons"
+      moderation_status: "pending" | "approved" | "rejected" | "flagged"
       subscription_tier: "free" | "pro" | "elite"
+      template_type: "brand_rider" | "cv" | "presentation"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -860,8 +1061,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_feature_type: ["image_generation", "voice_synthesis", "video_generation", "advanced_editing"],
       app_role: ["admin", "moderator", "super_admin", "user"],
+      asset_type: ["image", "audio", "video", "document"],
+      generation_status: ["pending", "processing", "completed", "failed", "cancelled"],
+      image_category: ["avatars", "backgrounds", "logos", "icons"],
+      moderation_status: ["pending", "approved", "rejected", "flagged"],
       subscription_tier: ["free", "pro", "elite"],
+      template_type: ["brand_rider", "cv", "presentation"],
     },
   },
 } as const

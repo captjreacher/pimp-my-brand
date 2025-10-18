@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin UI Mock Data Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .loading { color: orange; }
+        .mock-data { background: #ffebee; padding: 10px; margin: 5px 0; }
+        .real-data { background: #e8f5e8; padding: 10px; margin: 5px 0; }
+        .test-result { padding: 10px; margin: 10px 0; border-left: 4px solid; }
+        .test-result.pass { border-color: green; background: #f0fff0; }
+        .test-result.fail { border-color: red; background: #fff0f0; }
+    </style>
+</head>
+<body>
+    <h1>🎯 ADMIN UI MOCK DATA DETECTION TEST</h1>
+    <p>This test checks what the user actually sees in the admin dashboard UI</p>
+    
+    <div id="test-results"></div>
+    
+    <script type="module">
+        // Import Supabase client
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        // Get environment variables (you'll need to replace these)
+        const SUPABASE_URL = 'https://ixqjqfkpqhqjqfkpqhqj.supabase.co'; // Replace with your URL
+        const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your key
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const resultsDiv = document.getElementById('test-results');
+        
+        function addResult(testName, status, message, data = null) {
+            const div = document.createElement('div');
+            div.className = `test-result ${status}`;
+            div.innerHTML = `
+                <h3>${testName}: <span class="${status}">${status.toUpperCase()}</span></h3>
+                <p>${message}</p>
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            resultsDiv.appendChild(div);
+        }
+        
+        // Test 1: Check for hardcoded mock data patterns
+        async function testForHardcodedMockData() {
+            const mockDataPatterns = [
+                { pattern: /1247|1,247/, description: "Hardcoded user count 1247" },
+                { pattern: /892/, description: "Hardcoded active users 892" },
+                { pattern: /15420|15,420|\$15,420/, description: "Hardcoded revenue $15,420" },
+                { pattern: /john\.doe@example\.com/, description: "Fake email john.doe@example.com" },
+                { pattern: /user@example\.com/, description: "Fake email user@example.com" },
+                { pattern: /Tech Startup/, description: "Fake brand name 'Tech Startup'" },
+                { pattern: /\$29\.99/, description: "Fake payment amount $29.99" }
+            ];
+            
+            let foundMockData = [];
+            
+            // Check if we're on the admin page
+            if (window.location.pathname.includes('/admin')) {
+                const pageContent = document.body.innerText;
+                
+                mockDataPatterns.forEach(({ pattern, description }) => {
+                    if (pattern.test(pageContent)) {
+                        foundMockData.push(description);
+                    }
+                });
+            }
+            
+            if (foundMockData.length > 0) {
+                addResult(
+                    "Hardcoded Mock Data Check", 
+                    "fail", 
+                    `Found ${foundMockData.length} mock data patterns in UI`,
+                    foundMockData
+                );
+                return false;
+            } else {
+                addResult(
+                    "Hardcoded Mock Data Check", 
+                    "pass", 
+                    "No hardcoded mock data patterns found in UI"
+                );
+                return true;
+            }
+        }
+        
+        // Test 2: Check actual data being displayed
+        async function testActualDataDisplay() {
+            try {
+                // Get real data from database
+                const { data: profiles, error } = await supabase
+                    .from('profiles')
+                    .select('id, email, app_role')
+                    .limit(10);
+                
+                if (error) {
+                    addResult(
+                        "Database Connection", 
+                        "fail", 
+                        `Cannot connect to database: ${error.message}`
+                    );
+                    return false;
+                }
+                
+                const realUserCount = profiles.length;
+                const realEmails = profiles.map(p => p.email);
+                
+                // Check if UI shows real data
+                const pageContent = document.body.innerText;
+                let showingRealData = false;
+                
+                // Look for real email addresses in the UI
+                realEmails.forEach(email => {
+                    if (pageContent.includes(email)) {
+                        showingRealData = true;
+                    }
+                });
+                
+                // Look for real user count
+                if (pageContent.includes(realUserCount.toString())) {
+                    showingRealData = true;
+                }
+                
+                if (showingRealData) {
+                    addResult(
+                        "Real Data Display", 
+                        "pass", 
+                        `UI is displaying real data (${realUserCount} users found)`,
+                        { realUserCount, sampleEmails: realEmails.slice(0, 3) }
+                    );
+                    return true;
+                } else {
+                    addResult(
+                        "Real Data Display", 
+                        "fail", 
+                        "UI is not displaying real data from database",
+                        { 
+                            expectedUserCount: realUserCount, 
+                            expectedEmails: realEmails.slice(0, 3),
+                            pageContainsCount: pageContent.includes(realUserCount.toString())
+                        }
+                    );
+                    return false;
+                }
+                
+            } catch (error) {
+                addResult(
+                    "Real Data Display", 
+                    "fail", 
+                    `Error testing real data: ${error.message}`
+                );
+                return false;
+            }
+        }
+        
+        // Test 3: Check for demo data banner
+        async function testDemoDataBanner() {
+            const demoDataBanner = document.querySelector('[class*="demo"], [class*="Demo"], [id*="demo"], [id*="Demo"]');
+            const bannerText = document.body.innerText.toLowerCase();
+            
+            const hasDemoBanner = demoDataBanner || 
+                bannerText.includes('demo data') || 
+                bannerText.includes('mock data') || 
+                bannerText.includes('sample data') ||
+                bannerText.includes('using demo') ||
+                bannerText.includes('fix database');
+            
+            if (hasDemoBanner) {
+                addResult(
+                    "Demo Data Banner", 
+                    "fail", 
+                    "Demo data banner is visible in UI",
+                    { 
+                        bannerElement: demoDataBanner ? demoDataBanner.outerHTML : null,
+                        bannerText: bannerText.match(/(demo|mock|sample).{0,50}/gi)
+                    }
+                );
+                return false;
+            } else {
+                addResult(
+                    "Demo Data Banner", 
+                    "pass", 
+                    "No demo data banner visible"
+                );
+                return true;
+            }
+        }
+        
+        // Test 4: Check for loading states vs actual data
+        async function testLoadingVsData() {
+            const loadingElements = document.querySelectorAll('[class*="loading"], [class*="Loading"]');
+            const ellipsisElements = Array.from(document.querySelectorAll('*')).filter(el => 
+                el.textContent.includes('...') || el.textContent.includes('Loading')
+            );
+            
+            if (loadingElements.length > 0 || ellipsisElements.length > 0) {
+                addResult(
+                    "Loading State Check", 
+                    "fail", 
+                    "UI is stuck in loading state - data not loading properly",
+                    { 
+                        loadingElements: loadingElements.length,
+                        ellipsisElements: ellipsisElements.length 
+                    }
+                );
+                return false;
+            } else {
+                addResult(
+                    "Loading State Check", 
+                    "pass", 
+                    "No loading states detected - data appears to be loaded"
+                );
+                return true;
+            }
+        }
+        
+        // Test 5: Check for zero values (indicating failed data loading)
+        async function testZeroValues() {
+            const pageContent = document.body.innerText;
+            const zeroPatterns = [
+                /Total Users.*?0[^0-9]/,
+                /Active Users.*?0[^0-9]/,
+                /0 users/i,
+                /0 total/i
+            ];
+            
+            let foundZeros = [];
+            zeroPatterns.forEach((pattern, index) => {
+                const match = pageContent.match(pattern);
+                if (match) {
+                    foundZeros.push(match[0]);
+                }
+            });
+            
+            if (foundZeros.length > 0) {
+                addResult(
+                    "Zero Values Check", 
+                    "fail", 
+                    "Found zero values in UI - indicates data loading failure",
+                    foundZeros
+                );
+                return false;
+            } else {
+                addResult(
+                    "Zero Values Check", 
+                    "pass", 
+                    "No suspicious zero values found"
+                );
+                return true;
+            }
+        }
+        
+        // Run all tests
+        async function runAllTests() {
+            addResult("Test Suite", "loading", "Starting comprehensive UI mock data detection...");
+            
+            const results = await Promise.all([
+                testForHardcodedMockData(),
+                testActualDataDisplay(),
+                testDemoDataBanner(),
+                testLoadingVsData(),
+                testZeroValues()
+            ]);
+            
+            const passedTests = results.filter(Boolean).length;
+            const totalTests = results.length;
+            
+            if (passedTests === totalTests) {
+                addResult(
+                    "FINAL RESULT", 
+                    "pass", 
+                    `🎉 ALL TESTS PASSED (${passedTests}/${totalTests}) - NO MOCK DATA DETECTED IN UI`
+                );
+            } else {
+                addResult(
+                    "FINAL RESULT", 
+                    "fail", 
+                    `❌ ${totalTests - passedTests} TESTS FAILED (${passedTests}/${totalTests}) - MOCK DATA STILL PRESENT IN UI`
+                );
+            }
+        }
+        
+        // Wait for page to load then run tests
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runAllTests);
+        } else {
+            runAllTests();
+        }
+    </script>
+</body>
+</html>

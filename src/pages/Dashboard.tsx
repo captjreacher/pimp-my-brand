@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Plus } from "lucide-react";
+import { LogOut, User, Plus, Shield } from "lucide-react";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import type { Session } from "@supabase/supabase-js";
@@ -10,6 +10,7 @@ import type { Session } from "@supabase/supabase-js";
 const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const navigate = useNavigate();
 
   const { stats } = useDashboardData(session?.user?.id);
@@ -40,6 +41,17 @@ const Dashboard = () => {
       }
 
       setSession(session);
+
+      // Get user profile to check admin status
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      // Profile loaded successfully
+      
+      setUserProfile(profile);
 
       // Check if user has completed onboarding by checking if they have any content
       const [brandsResult, cvsResult, uploadsResult] = await Promise.all([
@@ -96,6 +108,20 @@ const Dashboard = () => {
                 <Plus className="w-4 h-4" />
                 Create
               </Button>
+              
+              {/* Admin button - only show for admin users */}
+              {userProfile && (userProfile.app_role === 'admin' || userProfile.app_role === 'super_admin' || userProfile.app_role === 'moderator') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/simple-admin")}
+                  className="gap-2 border-orange-500 text-orange-600 hover:bg-orange-50"
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin
+                </Button>
+              )}
+              
               <Button
                 variant="ghost"
                 size="sm"

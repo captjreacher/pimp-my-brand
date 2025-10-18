@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User Management - Fixed</title>
+</head>
+<body>
+    <h1>Testing User Management After Fix</h1>
+    <p>The RPC function issue has been bypassed. The user management service now uses direct database access.</p>
+    
+    <h2>What was fixed:</h2>
+    <ul>
+        <li>✅ Identified that RPC function `get_admin_user_list` was trying to access non-existent column `p.last_sign_in_at`</li>
+        <li>✅ Modified user management service to bypass broken RPC and use direct profiles table access</li>
+        <li>✅ Verified direct database access works correctly</li>
+        <li>✅ Found 5 users in database including super admin</li>
+    </ul>
+    
+    <h2>Next steps:</h2>
+    <ol>
+        <li>Refresh the admin user management page</li>
+        <li>The error should be gone and users should display</li>
+        <li>If needed, the RPC function can be fixed later using the SQL provided</li>
+    </ol>
+    
+    <p><strong>Please refresh your admin page now: <a href="http://localhost:8081/admin/users" target="_blank">http://localhost:8081/admin/users</a></strong></p>
+</body>
+</html>

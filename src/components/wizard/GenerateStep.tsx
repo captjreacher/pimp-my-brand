@@ -64,7 +64,7 @@ export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, o
 
       // Stage 3: Brand Rider assembly
       setStage("Assembling your Brand Rider...");
-      const riderRes = await supabase.functions.invoke("generate-brand-rider", {
+      const riderRes = await supabase.functions.invoke("generate-brand", {
         body: { styleData, visualData, format },
       });
 
@@ -342,7 +342,6 @@ export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, o
   if (!corpus || !corpus.trim()) {
     return (
       <div className="space-y-6 text-center py-12">
-        <div className="text-red-500 mb-4">DEBUG: GenerateStep - No corpus data available</div>
         <h2 className="font-heading text-3xl">Missing Content</h2>
         <p className="text-muted-foreground max-w-md mx-auto">
           No content was provided for brand generation. Please go back and upload some files first.
@@ -368,7 +367,6 @@ export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, o
   if (corpus.length < 100) {
     return (
       <div className="space-y-6 text-center py-12">
-        <div className="text-yellow-500 mb-4">DEBUG: GenerateStep - Corpus too small ({corpus.length} chars)</div>
         <h2 className="font-heading text-3xl">Limited Content</h2>
         <p className="text-muted-foreground max-w-md mx-auto">
           The uploaded content is very short ({corpus.length} characters). For better results, please upload more substantial content like resumes, writing samples, or project descriptions.
@@ -423,10 +421,7 @@ export function GenerateStep({ corpus, uploadIds, format, logoUrl, onComplete, o
         </div>
       )}
       
-      {/* Debug info */}
-      <div style={{ color: 'red', fontSize: '12px', marginTop: '20px' }}>
-        DEBUG: Corpus length: {corpus.length}, UploadIds: {uploadIds.length}
-      </div>
+
       
       {/* Manual trigger if auto-generation fails */}
       {!generating && (

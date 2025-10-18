@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin UI Browser Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .mock-data { background: #ffebee; color: red; font-weight: bold; }
+        .real-data { background: #e8f5e8; color: green; font-weight: bold; }
+        .instructions { background: #f0f8ff; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎯 ADMIN UI BROWSER RENDERING TEST</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Open your admin dashboard in another tab</li>
+            <li>Look at the User Management page</li>
+            <li>Check the numbers and data displayed</li>
+            <li>Come back here and fill in what you see</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>What do you see in the User Management page?</h3>
+        
+        <h4>User Statistics Cards:</h4>
+        <p>Total Users: <input type="text" id="totalUsers" placeholder="What number do you see?"></p>
+        <p>Active Users: <input type="text" id="activeUsers" placeholder="What number do you see?"></p>
+        <p>Suspended Users: <input type="text" id="suspendedUsers" placeholder="What number do you see?"></p>
+        <p>New This Week: <input type="text" id="newThisWeek" placeholder="What number do you see?"></p>
+        
+        <h4>User List:</h4>
+        <p>Do you see a "Demo Data Banner"? <select id="demoBanner"><option>No</option><option>Yes</option></select></p>
+        <p>First user email: <input type="text" id="firstEmail" placeholder="What email do you see?"></p>
+        <p>Second user email: <input type="text" id="secondEmail" placeholder="What email do you see?"></p>
+        
+        <button onclick="analyzeResults()">Analyze Results</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Expected real data (from our database)
+        const EXPECTED_REAL_DATA = {
+            totalUsers: 5,
+            activeUsers: 5,
+            suspendedUsers: 0,
+            newThisWeek: 5,
+            realEmails: [
+                'mike@mikerobinson.co.nz',
+                'mike@maximisedai.com', 
+                'admin@maximisedai.com',
+                'test@funkmybrand.com'
+            ]
+        };
+        
+        // Known mock data patterns
+        const MOCK_DATA_PATTERNS = {
+            numbers: [1247, 892, 15420, 12, 98.5, 23],
+            emails: [
+                'john.doe@example.com',
+                'user@example.com',
+                'admin@example.com',
+                'test@example.com'
+            ]
+        };
+        
+        function analyzeResults() {
+            const results = {
+                totalUsers: document.getElementById('totalUsers').value,
+                activeUsers: document.getElementById('activeUsers').value,
+                suspendedUsers: document.getElementById('suspendedUsers').value,
+                newThisWeek: document.getElementById('newThisWeek').value,
+                demoBanner: document.getElementById('demoBanner').value,
+                firstEmail: document.getElementById('firstEmail').value,
+                secondEmail: document.getElementById('secondEmail').value
+            };
+            
+            let analysis = [];
+            let mockDataFound = [];
+            let realDataFound = [];
+            
+            // Check numbers
+            Object.keys(EXPECTED_REAL_DATA).forEach(key => {
+                if (key !== 'realEmails' && results[key]) {
+                    const userValue = parseInt(results[key]);
+                    const expectedValue = EXPECTED_REAL_DATA[key];
+                    
+                    if (userValue === expectedValue) {
+                        realDataFound.push(`${key}: ${userValue} (matches real data)`);
+                    } else if (MOCK_DATA_PATTERNS.numbers.includes(userValue)) {
+                        mockDataFound.push(`${key}: ${userValue} (known mock data pattern)`);
+                    } else {
+                        analysis.push(`${key}: ${userValue} (unexpected value)`);
+                    }
+                }
+            });
+            
+            // Check emails
+            [results.firstEmail, results.secondEmail].forEach((email, index) => {
+                if (email) {
+                    if (EXPECTED_REAL_DATA.realEmails.includes(email)) {
+                        realDataFound.push(`Email ${index + 1}: ${email} (real user)`);
+                    } else if (MOCK_DATA_PATTERNS.emails.includes(email)) {
+                        mockDataFound.push(`Email ${index + 1}: ${email} (fake mock email)`);
+                    } else {
+                        analysis.push(`Email ${index + 1}: ${email} (unknown email)`);
+                    }
+                }
+            });
+            
+            // Check demo banner
+            if (results.demoBanner === 'Yes') {
+                mockDataFound.push('Demo Data Banner is visible (indicates mock data mode)');
+            } else {
+                realDataFound.push('No Demo Data Banner (good sign)');
+            }
+            
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="test-section">
+                    <h3>Analysis Results:</h3>
+                    
+                    ${mockDataFound.length > 0 ? `
+                        <div class="mock-data">
+                            <h4>❌ MOCK DATA DETECTED:</h4>
+                            <ul>${mockDataFound.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${realDataFound.length > 0 ? `
+                        <div class="real-data">
+                            <h4>✅ REAL DATA CONFIRMED:</h4>
+                            <ul>${realDataFound.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${analysis.length > 0 ? `
+                        <div>
+                            <h4>📊 OTHER OBSERVATIONS:</h4>
+                            <ul>${analysis.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    
+                    <h3>🎯 VERDICT:</h3>
+                    <p style="font-size: 18px; font-weight: bold; color: ${mockDataFound.length > 0 ? 'red' : 'green'}">
+                        ${mockDataFound.length > 0 
+                            ? `❌ MOCK DATA STILL PRESENT (${mockDataFound.length} issues found)`
+                            : '🎉 NO MOCK DATA DETECTED - UI SHOWING REAL DATA'
+                        }
+                    </p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

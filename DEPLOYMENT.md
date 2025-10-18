@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This guide covers the complete deployment process for the Personal Brand Generator application.
+This guide covers the complete deployment process for FunkMyBrand application.
 
 ## Pre-Deployment Checklist
 

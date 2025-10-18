@@ -1,3 +1,5 @@
+import { getFallbackImage } from './fallback-images';
+
 // Template image management system
 export interface TemplateImage {
   url: string;
@@ -17,7 +19,7 @@ export const TEMPLATE_IMAGES: Record<string, Record<string, TemplateImageSet>> =
   ufc: {
     avatar: {
       fictional: {
-        url: "https://images.unsplash.com/photo-1559114367-ff25e89adb7d?auto=format&fit=crop&w=640&q=80",
+        url: "https://images.unsplash.com/photo-1549451371-64aa98a6f660?auto=format&fit=crop&w=640&q=80",
         alt: "MMA fighter in full walkout gear",
         category: 'avatar',
         format: 'ufc'
@@ -161,7 +163,7 @@ export const TEMPLATE_IMAGES: Record<string, Record<string, TemplateImageSet>> =
   influencer: {
     avatar: {
       fictional: {
-        url: "https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=640&q=80",
+        url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=640&q=80",
         alt: "Content creator portrait",
         category: 'avatar',
         format: 'influencer'
@@ -310,7 +312,7 @@ export function getTemplateImage(
   
   if (!categoryImages) {
     return {
-      url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=640&q=80",
+      url: getFallbackImage(format, category),
       alt: "Placeholder image",
       category,
       format

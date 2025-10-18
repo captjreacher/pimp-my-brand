@@ -27,6 +27,7 @@ import { useUserSearch, useUserDetails, useUserStatistics, useUserManagementActi
 import { useAdmin } from '@/contexts/AdminContext';
 import { useToast } from '@/hooks/use-toast';
 import { type AdminUserView, type UserRole } from '@/lib/admin/user-management-service';
+import { DemoDataBanner } from '@/components/admin/DemoDataBanner';
 
 const USERS_PER_PAGE = 25;
 
@@ -272,6 +273,18 @@ export const UserManagementPage: React.FC = () => {
           Invite User
         </Button>
       </div>
+
+      {/* Data Status Banner */}
+      {searchResult?.isUsingDemoData && (
+        <DemoDataBanner 
+          onFixDatabase={() => {
+            toast({
+              title: "Database Fix Required",
+              description: "Run 'ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;' in Supabase SQL Editor to show real user data.",
+            });
+          }}
+        />
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

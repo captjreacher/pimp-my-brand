@@ -102,12 +102,12 @@ const defaultLightTheme: AdminTheme = {
 const defaultDarkTheme: AdminTheme = {
   ...defaultLightTheme,
   primaryColor: 'hsl(217.2 91.2% 59.8%)',
-  secondaryColor: 'hsl(217.2 32.6% 17.5%)',
-  backgroundColor: 'hsl(222.2 84% 4.9%)',
-  surfaceColor: 'hsl(217.2 32.6% 17.5%)',
+  secondaryColor: 'hsl(0 0% 15%)',
+  backgroundColor: 'hsl(0 0% 0%)',
+  surfaceColor: 'hsl(0 0% 10%)',
   textColor: 'hsl(210 40% 98%)',
   mutedTextColor: 'hsl(215 20.2% 65.1%)',
-  borderColor: 'hsl(217.2 32.6% 17.5%)',
+  borderColor: 'hsl(0 0% 20%)',
 };
 
 const AdminThemeContext = createContext<AdminThemeContextType | undefined>(undefined);
