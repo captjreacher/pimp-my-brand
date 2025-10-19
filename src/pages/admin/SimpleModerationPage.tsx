@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Flag, 
   Eye, 
@@ -13,7 +14,95 @@ import {
   MessageSquare
 } from 'lucide-react';
 
+interface ContentItem {
+  id: string;
+  title: string;
+  type: 'brand' | 'cv';
+  created_at: string;
+  user_id: string;
+  status?: string;
+}
+
+interface ModerationStats {
+  pending: number;
+  approved_today: number;
+  rejected_today: number;
+  auto_flagged: number;
+}
+
 export default function SimpleModerationPage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<ModerationStats>({
+    pending: 0,
+    approved_today: 0,
+    rejected_today: 0,
+    auto_flagged: 0
+  });
+  const [recentContent, setRecentContent] = useState<ContentItem[]>([]);
+  const [pendingContent, setPendingContent] = useState<ContentItem[]>([]);
+
+  useEffect(() => {
+    loadModerationData();
+  }, []);
+
+  const loadModerationData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get brands and CVs for moderation
+      const [brandsResult, cvsResult] = await Promise.all([
+        supabase
+          .from('brands')
+          .select('id, title, created_at, user_id')
+          .order('created_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('cvs')
+          .select('id, title, created_at, user_id')
+          .order('created_at', { ascending: false })
+          .limit(20)
+      ]);
+
+      if (brandsResult.error) throw brandsResult.error;
+      if (cvsResult.error) throw cvsResult.error;
+
+      // Combine and format content
+      const allContent: ContentItem[] = [
+        ...(brandsResult.data || []).map(brand => ({
+          ...brand,
+          type: 'brand' as const
+        })),
+        ...(cvsResult.data || []).map(cv => ({
+          ...cv,
+          type: 'cv' as const
+        }))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setRecentContent(allContent.slice(0, 10));
+      setPendingContent([]); // No pending system implemented yet
+
+      // Calculate real statistics
+      const today = new Date().toISOString().split('T')[0];
+      const todayContent = allContent.filter(item => 
+        item.created_at.startsWith(today)
+      );
+
+      setStats({
+        pending: 0, // No pending system yet
+        approved_today: todayContent.length, // All content is considered approved for now
+        rejected_today: 0, // No rejection system yet
+        auto_flagged: 0 // No auto-flagging system yet
+      });
+
+    } catch (err) {
+      console.error('Error loading moderation data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load moderation data');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -33,7 +122,7 @@ export default function SimpleModerationPage() {
               <h1 className="text-2xl font-bold text-white">Content Moderation</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={loadModerationData}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh Queue
               </Button>
@@ -46,7 +135,12 @@ export default function SimpleModerationPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-white mb-2">Content Moderation</h2>
-          <p className="text-gray-400">Review and moderate user-generated content</p>
+          <p className="text-gray-400">Review and moderate user-generated content - Real Data Mode</p>
+          {error && (
+            <div className="mt-4 p-4 bg-red-900 border border-red-700 rounded-lg">
+              <p className="text-red-300">Error: {error}</p>
+            </div>
+          )}
         </div>
 
         {/* Moderation Stats */}
@@ -57,7 +151,7 @@ export default function SimpleModerationPage() {
               <Flag className="h-4 w-4 text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">0</div>
+              <div className="text-2xl font-bold text-white">{stats.pending}</div>
               <p className="text-xs text-gray-400">Needs attention</p>
             </CardContent>
           </Card>
@@ -68,8 +162,8 @@ export default function SimpleModerationPage() {
               <CheckCircle className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">156</div>
-              <p className="text-xs text-gray-400">+12% from yesterday</p>
+              <div className="text-2xl font-bold text-white">{stats.approved_today}</div>
+              <p className="text-xs text-gray-400">Real content created today</p>
             </CardContent>
           </Card>
 
@@ -79,8 +173,8 @@ export default function SimpleModerationPage() {
               <XCircle className="h-4 w-4 text-red-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">8</div>
-              <p className="text-xs text-gray-400">5.1% rejection rate</p>
+              <div className="text-2xl font-bold text-white">{stats.rejected_today}</div>
+              <p className="text-xs text-gray-400">No rejections yet</p>
             </CardContent>
           </Card>
 
@@ -90,8 +184,8 @@ export default function SimpleModerationPage() {
               <AlertTriangle className="h-4 w-4 text-yellow-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">12</div>
-              <p className="text-xs text-gray-400">AI detection active</p>
+              <div className="text-2xl font-bold text-white">{stats.auto_flagged}</div>
+              <p className="text-xs text-gray-400">AI detection ready</p>
             </CardContent>
           </Card>
         </div>
@@ -105,23 +199,40 @@ export default function SimpleModerationPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[].map((item, index) => (
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-400">Loading moderation queue...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-red-400">Error: {error}</p>
+              </div>
+            ) : pendingContent.length === 0 ? (
+              <div className="text-center py-8">
+                <Flag className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400">No content pending review</p>
+                <p className="text-xs text-gray-500 mt-2">All content is automatically approved for now</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingContent.map((item, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
                   <div className="flex-1">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center">
-                        {item.type === 'Brand' ? (
+                        {item.type === 'brand' ? (
                           <Flag className="w-6 h-6 text-orange-400" />
                         ) : (
                           <MessageSquare className="w-6 h-6 text-blue-400" />
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">{item.content}</p>
-                        <p className="text-xs text-gray-400">ID: {item.id} • User: {item.user}</p>
-                        <p className="text-xs text-red-400">⚠ {item.flagged}</p>
-                        <p className="text-xs text-gray-500">{item.time}</p>
+                        <p className="text-sm font-medium text-white">{item.title}</p>
+                        <p className="text-xs text-gray-400">ID: {item.id} • User: {item.user_id}</p>
+                        <p className="text-xs text-gray-500">
+                          {item.type === 'brand' ? 'Brand' : 'CV'} • {new Date(item.created_at).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -129,12 +240,9 @@ export default function SimpleModerationPage() {
                   <div className="flex items-center gap-4">
                     <Badge 
                       variant="secondary"
-                      className={
-                        item.priority === 'high' ? 'bg-red-600' :
-                        item.priority === 'medium' ? 'bg-yellow-600' : 'bg-blue-600'
-                      }
+                      className="bg-blue-600"
                     >
-                      {item.priority}
+                      {item.type}
                     </Badge>
                     
                     <div className="flex gap-2">
@@ -155,6 +263,7 @@ export default function SimpleModerationPage() {
                 </div>
               ))}
             </div>
+            )}
           </CardContent>
         </Card>
 
@@ -200,26 +309,26 @@ export default function SimpleModerationPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[
-                  { action: 'Approved', content: 'Marketing Brand', moderator: 'Admin', time: '5 min ago', type: 'approve' },
-                  { action: 'Rejected', content: 'Spam CV Content', moderator: 'Moderator', time: '12 min ago', type: 'reject' },
-                  { action: 'Flagged', content: 'Suspicious Brand', moderator: 'AI System', time: '18 min ago', type: 'flag' },
-                  { action: 'Approved', content: 'Developer CV', moderator: 'Admin', time: '25 min ago', type: 'approve' },
-                ].map((action, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        action.type === 'approve' ? 'bg-green-400' :
-                        action.type === 'reject' ? 'bg-red-400' : 'bg-yellow-400'
-                      }`}></div>
-                      <div>
-                        <p className="text-sm text-white">{action.action}: {action.content}</p>
-                        <p className="text-xs text-gray-400">by {action.moderator}</p>
-                      </div>
-                    </div>
-                    <span className="text-xs text-gray-400">{action.time}</span>
+                {recentContent.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-gray-400">No recent activity</p>
                   </div>
-                ))}
+                ) : (
+                  recentContent.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                        <div>
+                          <p className="text-sm text-white">Created: {item.title}</p>
+                          <p className="text-xs text-gray-400">by User {item.user_id.slice(0, 8)}...</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {new Date(item.created_at).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -243,7 +352,11 @@ export default function SimpleModerationPage() {
                 <CheckCircle className="w-6 h-6" />
                 <span className="text-sm">Approve All</span>
               </Button>
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+              <Button 
+                variant="outline" 
+                className="h-20 flex flex-col items-center justify-center gap-2"
+                onClick={() => window.location.href = '/admin/config'}
+              >
                 <AlertTriangle className="w-6 h-6" />
                 <span className="text-sm">Auto-Flag Settings</span>
               </Button>

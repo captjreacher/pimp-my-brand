@@ -9,8 +9,9 @@ import { LoadingSkeleton } from "./components/ui/loading-skeleton";
 import { preloadCriticalResources } from "./lib/performance/preloader";
 import { initializePerformanceObserver } from "./lib/performance/bundle-analyzer";
 import { useWebVitals } from "./hooks/use-performance";
-import { AdminProvider } from "./contexts/AdminContext";
-import { AdminRouteGuard } from "./components/admin/AdminRouteGuard";
+// Admin context and route guards (available for future use)
+// import { AdminProvider } from "./contexts/AdminContext";
+// import { AdminRouteGuard } from "./components/admin/AdminRouteGuard";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -42,20 +43,30 @@ const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage")
 const SimpleAdminDashboard = lazy(() => import("./pages/admin/SimpleAdminDashboard"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").then(module => ({ default: module.UserManagementPage })));
 const SubscriptionManagementPage = lazy(() => import("./pages/admin/SubscriptionManagementPage").then(module => ({ default: module.SubscriptionManagementPage })));
+const TestSubscriptionPage = lazy(() => import("./pages/admin/TestSubscriptionPage").then(module => ({ default: module.TestSubscriptionPage })));
+const SuperSimpleTest = lazy(() => import("./pages/admin/SuperSimpleTest").then(module => ({ default: module.SuperSimpleTest })));
 const ContentModerationPage = lazy(() => import("./pages/admin/ContentModerationPage").then(module => ({ default: module.ContentModerationPage })));
 const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
 const SystemConfigPage = lazy(() => import("./pages/admin/SystemConfigPage").then(module => ({ default: module.SystemConfigPage })));
 const SecurityPage = lazy(() => import("./pages/admin/SecurityPage"));
 const CommunicationPage = lazy(() => import("./pages/admin/CommunicationPage"));
 const AIContentManagementPage = lazy(() => import("./pages/admin/AIContentManagementPage").then(module => ({ default: module.AIContentManagementPage })));
-const SimpleSubscriptionPage = lazy(() => import("./pages/admin/SimpleSubscriptionPage"));
 const SimpleAnalyticsPage = lazy(() => import("./pages/admin/SimpleAnalyticsPage"));
-const SimpleUserManagementPage = lazy(() => import("./pages/admin/SimpleUserManagementPage"));
+const DebugUserManagement = lazy(() => import("./pages/admin/DebugUserManagement"));
+const UltraSimpleTest = lazy(() => import("./pages/admin/UltraSimpleTest"));
+const SimpleWorkingUserManagement = lazy(() => import("./pages/admin/SimpleWorkingUserManagement"));
+const SimpleWorkingSubscriptions = lazy(() => import("./pages/admin/SimpleWorkingSubscriptions"));
+const DirectTestLinks = lazy(() => import("./pages/admin/DirectTestLinks"));
 const SimpleModerationPage = lazy(() => import("./pages/admin/SimpleModerationPage"));
 const SimpleConfigPage = lazy(() => import("./pages/admin/SimpleConfigPage"));
 const SimpleSecurityPage = lazy(() => import("./pages/admin/SimpleSecurityPage"));
 const SimpleCommunicationPage = lazy(() => import("./pages/admin/SimpleCommunicationPage"));
 const SimpleAIContentPage = lazy(() => import("./pages/admin/SimpleAIContentPage"));
+const SimpleSubscriptionPlansPage = lazy(() => import("./pages/admin/SimpleSubscriptionPlansPage").then(module => ({ default: module.SimpleSubscriptionPlansPage })));
+const TestPlansAccess = lazy(() => import("./pages/admin/TestPlansAccess").then(module => ({ default: module.TestPlansAccess })));
+const WorkingUserManagementPage = lazy(() => import("./pages/admin/WorkingUserManagementPage").then(module => ({ default: module.WorkingUserManagementPage })));
+const FullUserManagementPage = lazy(() => import("./pages/admin/FullUserManagementPage"));
+const FullAnalyticsPage = lazy(() => import("./pages/admin/FullAnalyticsPage"));
 
 const queryClient = createOptimizedQueryClient();
 
@@ -105,75 +116,45 @@ const App = () => {
             {/* Simple Admin Dashboard (no auth required for testing) */}
             <Route path="/admin-simple" element={<SimpleAdminDashboard />} />
             
-            {/* Admin Routes */}
+            {/* Admin Routes with Complex UI but Bypassed Auth */}
             <Route path="/admin/*" element={
               <Routes>
-                {/* Main admin dashboard - no auth required */}
+                {/* Complex admin pages without auth guards (temporarily) */}
                 <Route path="/" element={<SimpleAdminDashboard />} />
+                <Route path="/users" element={<FullUserManagementPage />} />
+                <Route path="/subscriptions" element={<SimpleSubscriptionPlansPage />} />
+                <Route path="/subscription-management" element={<SubscriptionManagementPage />} />
+                <Route path="/moderation" element={<ContentModerationPage />} />
+                <Route path="/analytics" element={<FullAnalyticsPage />} />
+                <Route path="/config" element={<SystemConfigPage />} />
+                <Route path="/security" element={<SecurityPage />} />
+                <Route path="/communication" element={<CommunicationPage />} />
+                <Route path="/ai-content" element={<AIContentManagementPage />} />
                 
-                {/* Individual admin pages - simplified routing */}
-                <Route path="/users" element={<SimpleUserManagementPage />} />
-                <Route path="/subscriptions" element={<SimpleSubscriptionPage />} />
-                <Route path="/moderation" element={<SimpleModerationPage />} />
-                <Route path="/analytics" element={<SimpleAnalyticsPage />} />
-                <Route path="/config" element={<SimpleConfigPage />} />
-                <Route path="/security" element={<SimpleSecurityPage />} />
-                <Route path="/communication" element={<SimpleCommunicationPage />} />
-                <Route path="/ai-content" element={<SimpleAIContentPage />} />
+                {/* Simple fallback versions */}
+                <Route path="/simple-dashboard" element={<SimpleAdminDashboard />} />
+                <Route path="/simple-users" element={<SimpleWorkingUserManagement />} />
+                <Route path="/simple-moderation" element={<SimpleModerationPage />} />
+                <Route path="/simple-analytics" element={<SimpleAnalyticsPage />} />
+                <Route path="/simple-config" element={<SimpleConfigPage />} />
+                <Route path="/simple-security" element={<SimpleSecurityPage />} />
+                <Route path="/simple-communication" element={<SimpleCommunicationPage />} />
+                <Route path="/simple-ai-content" element={<SimpleAIContentPage />} />
+                
+                {/* Debug and Test Routes */}
+                <Route path="/debug-users" element={<DebugUserManagement />} />
+                <Route path="/ultra-test" element={<UltraSimpleTest />} />
+                <Route path="/test-links" element={<DirectTestLinks />} />
+                <Route path="/test-plans-access" element={<TestPlansAccess />} />
               </Routes>
             } />
             
-            {/* Complex Admin Routes with Auth (DISABLED - using Simple routes only) */}
-            <Route path="/admin-complex-disabled/*" element={
-              <AdminProvider>
-                <Routes>
-                  <Route path="/" element={
-                    <AdminRouteGuard requiredPermissions={['view_analytics']}>
-                      <AdminDashboardPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/users" element={
-                    <AdminRouteGuard requiredPermissions={['manage_users']}>
-                      <UserManagementPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/subscriptions" element={
-                    <AdminRouteGuard requiredPermissions={['manage_billing']}>
-                      <SubscriptionManagementPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/moderation" element={
-                    <AdminRouteGuard requiredPermissions={['moderate_content']}>
-                      <ContentModerationPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/analytics" element={
-                    <AdminRouteGuard requiredPermissions={['view_analytics']}>
-                      <AnalyticsPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/config" element={
-                    <AdminRouteGuard requiredPermissions={['manage_system']}>
-                      <SystemConfigPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/security" element={
-                    <AdminRouteGuard requiredPermissions={['manage_system']}>
-                      <SecurityPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/communication" element={
-                    <AdminRouteGuard requiredPermissions={['manage_users']}>
-                      <CommunicationPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/ai-content" element={
-                    <AdminRouteGuard requiredPermissions={['moderate_content', 'view_analytics']}>
-                      <AIContentManagementPage />
-                    </AdminRouteGuard>
-                  } />
-                </Routes>
-              </AdminProvider>
+            {/* Legacy Test Routes */}
+            <Route path="/admin-legacy/*" element={
+              <Routes>
+                <Route path="/test-subscriptions" element={<TestSubscriptionPage />} />
+                <Route path="/super-simple-test" element={<SuperSimpleTest />} />
+              </Routes>
             } />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auth Status - Port 8081</title>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    <p>Testing authentication on port 8081...</p>
+    
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        // Test URLs on port 8081
+        const testUrls = [
+            'http://localhost:8081/',
+            'http://localhost:8081/dashboard', 
+            'http://localhost:8081/admin'
+        ];
+        
+        results.innerHTML = `
+            <h2>Test These URLs:</h2>
+            <ul>
+                <li><a href="http://localhost:8081/" target="_blank">Home Page</a></li>
+                <li><a href="http://localhost:8081/dashboard" target="_blank">Dashboard (requires login)</a></li>
+                <li><a href="http://localhost:8081/admin" target="_blank">Admin Panel</a></li>
+            </ul>
+            
+            <h3>What to Check:</h3>
+            <ol>
+                <li><strong>Home Page:</strong> Do you see a login button or are you already logged in?</li>
+                <li><strong>Dashboard:</strong> If you're logged in, this should show your dashboard</li>
+                <li><strong>Admin:</strong> This will show if you have admin access</li>
+            </ol>
+            
+            <h3>Expected Results:</h3>
+            <ul>
+                <li>If you see "Sign In" button → You need to log in first</li>
+                <li>If dashboard works → You're logged in</li>
+                <li>If admin shows "Unauthorized" → You're logged in but not admin</li>
+                <li>If admin works → You're already an admin!</li>
+            </ul>
+        `;
+    </script>
+</body>
+</html>
