@@ -37,27 +37,39 @@ export function AdminProvider({ children }: AdminProviderProps) {
   // Initialize admin authentication
   const initialize = useCallback(async () => {
     try {
+      console.log('AdminContext: Starting initialization...');
       setIsLoading(true);
       setError(null);
 
-      const adminUser = await authService.initialize();
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Admin initialization timeout')), 5000);
+      });
+
+      const adminUser = await Promise.race([
+        authService.initialize(),
+        timeoutPromise
+      ]) as AdminUser | null;
+      
+      console.log('AdminContext: Initialization result:', adminUser);
       
       if (adminUser) {
         setUser(adminUser);
         setPermissions(getPermissionsForRole(adminUser.app_role));
         setSession(authService.getCurrentSession());
         
-        // Start admin session if not already active
-        if (!authService.getCurrentSession()) {
-          try {
-            const newSession = await authService.startAdminSession();
-            setSession(newSession);
-          } catch (sessionError) {
-            console.warn('Failed to start admin session:', sessionError);
-            // Don't fail initialization if session creation fails
-          }
-        }
+        // Start admin session if not already active (skip for now to avoid hanging)
+        // if (!authService.getCurrentSession()) {
+        //   try {
+        //     const newSession = await authService.startAdminSession();
+        //     setSession(newSession);
+        //   } catch (sessionError) {
+        //     console.warn('Failed to start admin session:', sessionError);
+        //     // Don't fail initialization if session creation fails
+        //   }
+        // }
       } else {
+        console.log('AdminContext: No admin user found');
         setUser(null);
         setPermissions({
           canManageUsers: false,
@@ -75,6 +87,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
       setUser(null);
       setSession(null);
     } finally {
+      console.log('AdminContext: Initialization complete, setting loading to false');
       setIsLoading(false);
     }
   }, [authService]);

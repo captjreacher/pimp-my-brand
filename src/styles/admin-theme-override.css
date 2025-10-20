@@ -1,0 +1,332 @@
+/* Admin Theme Override - Force consistent theming */
+
+/* Apply admin theme to all admin pages */
+.admin-theme-root {
+  /* Primary brand colors */
+  --admin-primary: #3b82f6 !important;
+  --admin-primary-foreground: #ffffff !important;
+  
+  /* Secondary colors */
+  --admin-secondary: #f1f5f9 !important;
+  --admin-secondary-foreground: #0f172a !important;
+  
+  /* Status colors */
+  --admin-success: #10b981 !important;
+  --admin-warning: #f59e0b !important;
+  --admin-danger: #ef4444 !important;
+  --admin-info: #3b82f6 !important;
+  
+  /* Background colors */
+  --admin-background: #ffffff !important;
+  --admin-surface: #ffffff !important;
+  --admin-muted: #f8fafc !important;
+  
+  /* Text colors */
+  --admin-text: #0f172a !important;
+  --admin-text-muted: #64748b !important;
+  
+  /* Border colors */
+  --admin-border: #e2e8f0 !important;
+  
+  /* Apply to CSS custom properties */
+  --primary: var(--admin-primary) !important;
+  --primary-foreground: var(--admin-primary-foreground) !important;
+  --secondary: var(--admin-secondary) !important;
+  --secondary-foreground: var(--admin-secondary-foreground) !important;
+  --background: var(--admin-background) !important;
+  --foreground: var(--admin-text) !important;
+  --muted: var(--admin-muted) !important;
+  --muted-foreground: var(--admin-text-muted) !important;
+  --border: var(--admin-border) !important;
+  --card: var(--admin-surface) !important;
+  --card-foreground: var(--admin-text) !important;
+}
+
+/* Force admin theme on all admin components */
+.admin-theme-root * {
+  border-color: var(--admin-border) !important;
+}
+
+/* Admin buttons */
+.admin-theme-root .btn-primary,
+.admin-theme-root button[data-variant="default"] {
+  background-color: var(--admin-primary) !important;
+  color: var(--admin-primary-foreground) !important;
+  border-color: var(--admin-primary) !important;
+}
+
+.admin-theme-root .btn-primary:hover,
+.admin-theme-root button[data-variant="default"]:hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.admin-theme-root .btn-secondary,
+.admin-theme-root button[data-variant="secondary"] {
+  background-color: var(--admin-secondary) !important;
+  color: var(--admin-secondary-foreground) !important;
+  border-color: var(--admin-border) !important;
+}
+
+.admin-theme-root .btn-outline,
+.admin-theme-root button[data-variant="outline"] {
+  background-color: transparent !important;
+  color: var(--admin-text) !important;
+  border-color: var(--admin-border) !important;
+}
+
+.admin-theme-root .btn-outline:hover,
+.admin-theme-root button[data-variant="outline"]:hover {
+  background-color: var(--admin-secondary) !important;
+}
+
+/* Admin cards */
+.admin-theme-root .card,
+.admin-theme-root [data-component="card"] {
+  background-color: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+  color: var(--admin-text) !important;
+}
+
+/* Admin badges */
+.admin-theme-root .badge-success {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+.admin-theme-root .badge-warning {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.admin-theme-root .badge-danger {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.admin-theme-root .badge-info {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.admin-theme-root .badge-secondary {
+  background-color: var(--admin-secondary) !important;
+  color: var(--admin-text-muted) !important;
+}
+
+/* Admin inputs */
+.admin-theme-root input,
+.admin-theme-root select,
+.admin-theme-root textarea {
+  background-color: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+  color: var(--admin-text) !important;
+}
+
+.admin-theme-root input:focus,
+.admin-theme-root select:focus,
+.admin-theme-root textarea:focus {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Admin tables */
+.admin-theme-root table {
+  background-color: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+}
+
+.admin-theme-root th {
+  background-color: var(--admin-secondary) !important;
+  color: var(--admin-text-muted) !important;
+  border-color: var(--admin-border) !important;
+}
+
+.admin-theme-root td {
+  border-color: var(--admin-border) !important;
+}
+
+.admin-theme-root tr:hover {
+  background-color: var(--admin-muted) !important;
+}
+
+/* Admin alerts */
+.admin-theme-root .alert-info {
+  background-color: #dbeafe !important;
+  border-color: #93c5fd !important;
+  color: #1e40af !important;
+}
+
+.admin-theme-root .alert-success {
+  background-color: #dcfce7 !important;
+  border-color: #86efac !important;
+  color: #166534 !important;
+}
+
+.admin-theme-root .alert-warning {
+  background-color: #fef3c7 !important;
+  border-color: #fcd34d !important;
+  color: #92400e !important;
+}
+
+.admin-theme-root .alert-danger {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #991b1b !important;
+}
+
+/* Force text colors */
+.admin-theme-root h1,
+.admin-theme-root h2,
+.admin-theme-root h3,
+.admin-theme-root h4,
+.admin-theme-root h5,
+.admin-theme-root h6 {
+  color: var(--admin-text) !important;
+}
+
+.admin-theme-root p {
+  color: var(--admin-text) !important;
+}
+
+.admin-theme-root .text-muted-foreground,
+.admin-theme-root .text-gray-500,
+.admin-theme-root .text-gray-600 {
+  color: var(--admin-text-muted) !important;
+}
+
+/* Force background colors */
+.admin-theme-root .bg-white {
+  background-color: var(--admin-surface) !important;
+}
+
+.admin-theme-root .bg-gray-50 {
+  background-color: var(--admin-muted) !important;
+}
+
+.admin-theme-root .bg-gray-100 {
+  background-color: var(--admin-secondary) !important;
+}
+
+/* Status indicator colors */
+.admin-theme-root .text-green-600 {
+  color: var(--admin-success) !important;
+}
+
+.admin-theme-root .text-yellow-600 {
+  color: var(--admin-warning) !important;
+}
+
+.admin-theme-root .text-red-600 {
+  color: var(--admin-danger) !important;
+}
+
+.admin-theme-root .text-blue-600 {
+  color: var(--admin-info) !important;
+}
+
+/* Background status colors */
+.admin-theme-root .bg-green-100 {
+  background-color: #dcfce7 !important;
+}
+
+.admin-theme-root .bg-yellow-100 {
+  background-color: #fef3c7 !important;
+}
+
+.admin-theme-root .bg-red-100 {
+  background-color: #fee2e2 !important;
+}
+
+.admin-theme-root .bg-blue-100 {
+  background-color: #dbeafe !important;
+}
+
+.admin-theme-root .bg-purple-100 {
+  background-color: #f3e8ff !important;
+}
+
+/* Text status colors for badges */
+.admin-theme-root .text-green-800 {
+  color: #166534 !important;
+}
+
+.admin-theme-root .text-yellow-800 {
+  color: #92400e !important;
+}
+
+.admin-theme-root .text-red-800 {
+  color: #991b1b !important;
+}
+
+.admin-theme-root .text-blue-800 {
+  color: #1e40af !important;
+}
+
+.admin-theme-root .text-purple-800 {
+  color: #6b21a8 !important;
+}
+
+/* Ensure consistent spacing and layout */
+.admin-theme-root .space-y-4 > * + * {
+  margin-top: 1rem !important;
+}
+
+.admin-theme-root .space-y-6 > * + * {
+  margin-top: 1.5rem !important;
+}
+
+.admin-theme-root .gap-4 {
+  gap: 1rem !important;
+}
+
+.admin-theme-root .gap-6 {
+  gap: 1.5rem !important;
+}
+
+/* Consistent border radius */
+.admin-theme-root .rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+.admin-theme-root .rounded {
+  border-radius: 0.25rem !important;
+}
+
+/* Consistent shadows */
+.admin-theme-root .shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.admin-theme-root .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Hover effects */
+.admin-theme-root .hover\:bg-gray-50:hover {
+  background-color: var(--admin-muted) !important;
+}
+
+.admin-theme-root .hover\:bg-gray-100:hover {
+  background-color: var(--admin-secondary) !important;
+}
+
+/* Focus states */
+.admin-theme-root *:focus {
+  outline: 2px solid var(--admin-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Transitions */
+.admin-theme-root * {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Remove any conflicting styles */
+.admin-theme-root .dark\:bg-gray-800,
+.admin-theme-root .dark\:text-white,
+.admin-theme-root .dark\:border-gray-700 {
+  background-color: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border-color: var(--admin-border) !important;
+}

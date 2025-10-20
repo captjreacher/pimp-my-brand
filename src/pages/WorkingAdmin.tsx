@@ -176,7 +176,7 @@ const WorkingAdmin = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-300 mb-4">{error}</p>
-            <Button onClick={() => window.location.href = '/simple-admin'} className="w-full">
+            <Button onClick={() => window.location.href = '/admin'} className="w-full">
               Back to Admin
             </Button>
           </CardContent>
@@ -194,7 +194,7 @@ const WorkingAdmin = () => {
             <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
-                onClick={() => window.location.href = '/simple-admin'}
+                onClick={() => window.location.href = '/admin'}
                 className="gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />

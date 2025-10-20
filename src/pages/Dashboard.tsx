@@ -114,7 +114,7 @@ const Dashboard = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate("/simple-admin")}
+                  onClick={() => navigate("/admin")}
                   className="gap-2 border-orange-500 text-orange-600 hover:bg-orange-50"
                 >
                   <Shield className="w-4 h-4" />

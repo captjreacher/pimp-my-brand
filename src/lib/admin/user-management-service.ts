@@ -86,7 +86,7 @@ class UserManagementService {
     try {
       let query = supabase
         .from('profiles')
-        .select('id, email, full_name, app_role, subscription_tier, created_at, updated_at, is_suspended, suspended_at, suspended_by, suspension_reason, admin_notes, last_admin_action');
+        .select('id, email, full_name, app_role, subscription_tier, created_at, updated_at, suspended_at, suspended_by, suspension_reason, admin_notes, last_admin_action, last_sign_in, generations_used');
 
       // Apply filters
       if (filters.search) {
@@ -98,9 +98,9 @@ class UserManagementService {
       }
 
       if (filters.status === 'active') {
-        query = query.eq('is_suspended', false);
+        query = query.is('suspended_at', null);
       } else if (filters.status === 'suspended') {
-        query = query.eq('is_suspended', true);
+        query = query.not('suspended_at', 'is', null);
       }
 
       // Apply pagination
@@ -111,7 +111,6 @@ class UserManagementService {
       const { data: profilesData, error: profilesError } = await query;
       
       if (profilesError) {
-        console.error('Direct profiles access failed:', profilesError.message);
         this._usingDemoData = true;
         return [];
       }
@@ -119,26 +118,25 @@ class UserManagementService {
       // Convert profiles data to AdminUserView format
       const convertedData = profilesData?.map(profile => ({
         id: profile.id,
-        email: profile.email,
+        email: profile.email || '',
         full_name: profile.full_name,
         app_role: profile.app_role || 'user',
         subscription_tier: profile.subscription_tier || 'free',
-        created_at: profile.created_at,
-        last_sign_in: profile.updated_at, // Using updated_at as proxy for last activity
-        is_suspended: profile.is_suspended || false,
+        created_at: profile.created_at || new Date().toISOString(),
+        last_sign_in: profile.last_sign_in || profile.updated_at,
+        is_suspended: !!profile.suspended_at,
         suspended_at: profile.suspended_at,
         suspended_by: profile.suspended_by,
         suspension_reason: profile.suspension_reason,
         admin_notes: profile.admin_notes,
         last_admin_action: profile.last_admin_action,
         content_count: 0, // Will be calculated separately if needed
-        total_generations: 0
+        total_generations: profile.generations_used || 0
       })) || [];
       
       this._usingDemoData = false;
       return convertedData;
     } catch (error) {
-      console.error('Error in direct profiles access:', error);
       this._usingDemoData = true;
       return [];
     }
@@ -403,14 +401,14 @@ class UserManagementService {
       const { data: activeUsers, error: activeError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('is_suspended', false);
+        .is('suspended_at', null);
 
       if (activeError) throw activeError;
 
       const { data: suspendedUsers, error: suspendedError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('is_suspended', true);
+        .not('suspended_at', 'is', null);
 
       if (suspendedError) throw suspendedError;
 

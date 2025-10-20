@@ -1,0 +1,457 @@
+/* Clean Admin Dashboard Styles */
+/* Consistent theming, no debug messages, professional appearance */
+
+.admin-theme-root {
+  --admin-primary: hsl(221.2 83.2% 53.3%);
+  --admin-secondary: hsl(210 40% 96%);
+  --admin-accent: hsl(221.2 83.2% 53.3%);
+  --admin-danger: hsl(0 84.2% 60.2%);
+  --admin-warning: hsl(47.9 95.8% 53.1%);
+  --admin-success: hsl(142.1 76.2% 36.3%);
+  --admin-background: hsl(0 0% 100%);
+  --admin-surface: hsl(0 0% 100%);
+  --admin-text: hsl(222.2 84% 4.9%);
+  --admin-text-muted: hsl(215.4 16.3% 46.9%);
+  --admin-border: hsl(214.3 31.8% 91.4%);
+  --admin-border-radius: 0.5rem;
+  
+  /* Spacing */
+  --admin-spacing-xs: 0.25rem;
+  --admin-spacing-sm: 0.5rem;
+  --admin-spacing-md: 1rem;
+  --admin-spacing-lg: 1.5rem;
+  --admin-spacing-xl: 2rem;
+  
+  /* Shadows */
+  --admin-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --admin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --admin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Typography */
+  --admin-font-family: Inter, system-ui, sans-serif;
+  --admin-text-xs: 0.75rem;
+  --admin-text-sm: 0.875rem;
+  --admin-text-base: 1rem;
+  --admin-text-lg: 1.125rem;
+  --admin-text-xl: 1.25rem;
+  --admin-text-2xl: 1.5rem;
+  --admin-text-3xl: 1.875rem;
+  --admin-font-normal: 400;
+  --admin-font-medium: 500;
+  --admin-font-semibold: 600;
+  --admin-font-bold: 700;
+}
+
+.admin-theme-root.admin-dark {
+  --admin-primary: hsl(217.2 91.2% 59.8%);
+  --admin-secondary: hsl(0 0% 15%);
+  --admin-background: hsl(0 0% 0%);
+  --admin-surface: hsl(0 0% 10%);
+  --admin-text: hsl(210 40% 98%);
+  --admin-text-muted: hsl(215 20.2% 65.1%);
+  --admin-border: hsl(0 0% 20%);
+}
+
+/* Clean Admin Layout */
+.clean-admin-layout {
+  min-height: 100vh;
+  background-color: var(--admin-background);
+  color: var(--admin-text);
+  font-family: var(--admin-font-family);
+}
+
+.clean-admin-header {
+  background-color: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-border);
+  padding: var(--admin-spacing-lg) var(--admin-spacing-xl);
+}
+
+.clean-admin-content {
+  padding: var(--admin-spacing-xl);
+}
+
+/* Clean Admin Cards */
+.clean-admin-card {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-border-radius);
+  box-shadow: var(--admin-shadow-sm);
+  padding: var(--admin-spacing-lg);
+}
+
+.clean-admin-card-header {
+  margin-bottom: var(--admin-spacing-md);
+}
+
+.clean-admin-card-title {
+  font-size: var(--admin-text-lg);
+  font-weight: var(--admin-font-semibold);
+  color: var(--admin-text);
+  margin: 0;
+}
+
+.clean-admin-card-description {
+  font-size: var(--admin-text-sm);
+  color: var(--admin-text-muted);
+  margin: var(--admin-spacing-xs) 0 0 0;
+}
+
+/* Clean Admin Buttons */
+.clean-admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--admin-spacing-xs);
+  padding: var(--admin-spacing-sm) var(--admin-spacing-md);
+  border-radius: var(--admin-border-radius);
+  font-size: var(--admin-text-sm);
+  font-weight: var(--admin-font-medium);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.clean-admin-button-primary {
+  background-color: var(--admin-primary);
+  color: white;
+}
+
+.clean-admin-button-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.clean-admin-button-secondary {
+  background-color: var(--admin-secondary);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+}
+
+.clean-admin-button-secondary:hover {
+  background-color: var(--admin-border);
+}
+
+.clean-admin-button-outline {
+  background-color: transparent;
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+}
+
+.clean-admin-button-outline:hover {
+  background-color: var(--admin-secondary);
+}
+
+/* Clean Admin Badges */
+.clean-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--admin-spacing-xs) var(--admin-spacing-sm);
+  border-radius: calc(var(--admin-border-radius) * 0.75);
+  font-size: var(--admin-text-xs);
+  font-weight: var(--admin-font-medium);
+}
+
+.clean-admin-badge-success {
+  background-color: hsl(142.1 76.2% 36.3% / 0.1);
+  color: hsl(142.1 76.2% 36.3%);
+}
+
+.clean-admin-badge-warning {
+  background-color: hsl(47.9 95.8% 53.1% / 0.1);
+  color: hsl(47.9 95.8% 53.1%);
+}
+
+.clean-admin-badge-danger {
+  background-color: hsl(0 84.2% 60.2% / 0.1);
+  color: hsl(0 84.2% 60.2%);
+}
+
+.clean-admin-badge-info {
+  background-color: hsl(221.2 83.2% 53.3% / 0.1);
+  color: hsl(221.2 83.2% 53.3%);
+}
+
+.clean-admin-badge-secondary {
+  background-color: var(--admin-secondary);
+  color: var(--admin-text-muted);
+}
+
+/* Clean Admin Tables */
+.clean-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--admin-text-sm);
+}
+
+.clean-admin-table th {
+  background-color: var(--admin-secondary);
+  padding: var(--admin-spacing-md);
+  text-align: left;
+  font-weight: var(--admin-font-medium);
+  color: var(--admin-text-muted);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.clean-admin-table td {
+  padding: var(--admin-spacing-md);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.clean-admin-table tr:hover {
+  background-color: var(--admin-secondary);
+}
+
+/* Clean Admin Forms */
+.clean-admin-input {
+  width: 100%;
+  padding: var(--admin-spacing-sm) var(--admin-spacing-md);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-border-radius);
+  background-color: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: var(--admin-text-sm);
+}
+
+.clean-admin-input:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 2px hsl(221.2 83.2% 53.3% / 0.2);
+}
+
+.clean-admin-select {
+  width: 100%;
+  padding: var(--admin-spacing-sm) var(--admin-spacing-md);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-border-radius);
+  background-color: var(--admin-surface);
+  color: var(--admin-text);
+  font-size: var(--admin-text-sm);
+}
+
+/* Clean Admin Metrics */
+.clean-admin-metric {
+  text-align: center;
+  padding: var(--admin-spacing-lg);
+}
+
+.clean-admin-metric-value {
+  font-size: var(--admin-text-3xl);
+  font-weight: var(--admin-font-bold);
+  color: var(--admin-text);
+  margin-bottom: var(--admin-spacing-xs);
+}
+
+.clean-admin-metric-label {
+  font-size: var(--admin-text-sm);
+  color: var(--admin-text-muted);
+  font-weight: var(--admin-font-medium);
+}
+
+.clean-admin-metric-change {
+  font-size: var(--admin-text-xs);
+  margin-top: var(--admin-spacing-xs);
+}
+
+.clean-admin-metric-change.positive {
+  color: var(--admin-success);
+}
+
+.clean-admin-metric-change.negative {
+  color: var(--admin-danger);
+}
+
+/* Clean Admin Loading States */
+.clean-admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--admin-spacing-xl);
+}
+
+.clean-admin-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--admin-border);
+  border-top: 2px solid var(--admin-primary);
+  border-radius: 50%;
+  animation: clean-admin-spin 1s linear infinite;
+}
+
+@keyframes clean-admin-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Clean Admin Alerts */
+.clean-admin-alert {
+  padding: var(--admin-spacing-md);
+  border-radius: var(--admin-border-radius);
+  border: 1px solid;
+  margin-bottom: var(--admin-spacing-md);
+}
+
+.clean-admin-alert-info {
+  background-color: hsl(221.2 83.2% 53.3% / 0.1);
+  border-color: hsl(221.2 83.2% 53.3% / 0.2);
+  color: hsl(221.2 83.2% 53.3%);
+}
+
+.clean-admin-alert-success {
+  background-color: hsl(142.1 76.2% 36.3% / 0.1);
+  border-color: hsl(142.1 76.2% 36.3% / 0.2);
+  color: hsl(142.1 76.2% 36.3%);
+}
+
+.clean-admin-alert-warning {
+  background-color: hsl(47.9 95.8% 53.1% / 0.1);
+  border-color: hsl(47.9 95.8% 53.1% / 0.2);
+  color: hsl(47.9 95.8% 53.1%);
+}
+
+.clean-admin-alert-danger {
+  background-color: hsl(0 84.2% 60.2% / 0.1);
+  border-color: hsl(0 84.2% 60.2% / 0.2);
+  color: hsl(0 84.2% 60.2%);
+}
+
+/* Clean Admin Grid */
+.clean-admin-grid {
+  display: grid;
+  gap: var(--admin-spacing-lg);
+}
+
+.clean-admin-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.clean-admin-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.clean-admin-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+  .clean-admin-grid-2,
+  .clean-admin-grid-3,
+  .clean-admin-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Clean Admin Navigation */
+.clean-admin-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--admin-spacing-md);
+  margin-bottom: var(--admin-spacing-lg);
+}
+
+.clean-admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--admin-spacing-xs);
+  padding: var(--admin-spacing-sm) var(--admin-spacing-md);
+  border-radius: var(--admin-border-radius);
+  color: var(--admin-text-muted);
+  text-decoration: none;
+  font-size: var(--admin-text-sm);
+  transition: all 0.2s ease-in-out;
+}
+
+.clean-admin-nav-link:hover {
+  background-color: var(--admin-secondary);
+  color: var(--admin-text);
+}
+
+.clean-admin-nav-link.active {
+  background-color: var(--admin-primary);
+  color: white;
+}
+
+/* Clean Admin Status Indicators */
+.clean-admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--admin-spacing-xs);
+  font-size: var(--admin-text-sm);
+}
+
+.clean-admin-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.clean-admin-status-online .clean-admin-status-dot {
+  background-color: var(--admin-success);
+}
+
+.clean-admin-status-offline .clean-admin-status-dot {
+  background-color: var(--admin-danger);
+}
+
+.clean-admin-status-warning .clean-admin-status-dot {
+  background-color: var(--admin-warning);
+}
+
+/* Clean Admin Responsive */
+@media (max-width: 640px) {
+  .clean-admin-content {
+    padding: var(--admin-spacing-md);
+  }
+  
+  .clean-admin-header {
+    padding: var(--admin-spacing-md);
+  }
+  
+  .clean-admin-card {
+    padding: var(--admin-spacing-md);
+  }
+}
+
+/* Hide debug messages and console outputs */
+.debug-message,
+.console-output,
+.mock-data-indicator,
+.development-notice {
+  display: none !important;
+}
+
+/* Ensure consistent focus states */
+*:focus {
+  outline: 2px solid var(--admin-primary);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, select, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Professional hover effects */
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--admin-shadow-md);
+}
+
+/* Clean scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--admin-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--admin-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--admin-text-muted);
+}
