@@ -84,6 +84,11 @@ supabase functions deploy generate-cv
 supabase secrets set OPENAI_API_KEY=your-key
 ```
 
+## 📚 Documentation
+
+- The most up-to-date deployment, production, and platform setup guides live in the project root alongside this README.
+- Legacy admin references, troubleshooting notes, and historical research have been moved to [`docs/archive`](docs/archive) to keep the workspace tidy while preserving institutional knowledge.
+
 ## 📁 Project Structure
 
 ```
@@ -98,7 +103,8 @@ funkmybrand/
 │   ├── functions/          # Edge Functions
 │   └── migrations/         # Database migrations
 ├── scripts/                # Deployment and utility scripts
-└── docs/                   # Documentation
+└── docs/
+    └── archive/           # Historical docs grouped by topic
 ```
 
 ## 🎨 Brand Formats
