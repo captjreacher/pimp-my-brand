@@ -154,6 +154,9 @@ export function AdminOnboarding({ isOpen, onClose, onComplete }: AdminOnboarding
     localStorage.setItem(`admin-onboarding-completed-${user?.id}`, 'true');
     onComplete();
     onClose();
+    
+    // Navigate to admin dashboard
+    window.location.href = '/admin';
   };
 
   const currentStepData = availableSteps[currentStep];
@@ -239,9 +242,14 @@ export function AdminOnboarding({ isOpen, onClose, onComplete }: AdminOnboarding
               </Button>
 
               {currentStep === availableSteps.length - 1 ? (
-                <Button onClick={handleComplete}>
-                  Complete Onboarding
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => window.location.href = '/admin/fallback'}>
+                    Simple Admin
+                  </Button>
+                  <Button onClick={handleComplete}>
+                    Go to System Admin
+                  </Button>
+                </div>
               ) : (
                 <Button onClick={handleNext}>
                   Next
@@ -382,8 +390,8 @@ function OnboardingStepContent({ step }: { step: OnboardingStep }) {
       
       <div className="mt-6 pt-4 border-t">
         <Button asChild variant="outline" className="w-full">
-          <a href={step.path} target="_blank" rel="noopener noreferrer">
-            Open {step.title} Section
+          <a href="/admin">
+            Go to Admin Dashboard
             <ArrowRight className="h-4 w-4 ml-2" />
           </a>
         </Button>

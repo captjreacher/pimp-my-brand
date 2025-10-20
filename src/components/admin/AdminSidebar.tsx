@@ -30,6 +30,8 @@ import {
   Crown,
   UserCheck,
   Flag,
+  Bot,
+  Zap,
 } from 'lucide-react';
 import type { AdminPermission } from '@/lib/admin/types';
 
@@ -93,6 +95,13 @@ export function AdminSidebar() {
           badge: '12', // This would come from real data
           requiredPermissions: ['moderate_content'],
           description: 'Review flagged content',
+        },
+        {
+          title: 'AI Content Management',
+          url: '/admin/ai-content',
+          icon: Bot,
+          requiredPermissions: ['moderate_content', 'view_analytics'],
+          description: 'AI content moderation and analytics',
         },
         {
           title: 'Content Library',

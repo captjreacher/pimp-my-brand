@@ -1,8 +1,12 @@
 // Simple Node.js script to test Supabase connection
 import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-const SUPABASE_URL = 'https://nfafvtyhmprzydxhebbm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mYWZ2dHlobXByenlkeGhlYmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0ODk1NDMsImV4cCI6MjA3NTA2NTU0M30.8fR2Z_rwHN8_BjvWvvIgxM-7YBF-otie5r4zF7RiK4M';
+// Load environment variables
+dotenv.config();
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 async function testConnection() {
   console.log('Testing Supabase connection...');

@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import { RobustImage } from "@/components/ui/robust-image";
 
 interface TemplateAvatar {
   url: string;
@@ -29,7 +30,11 @@ export const UFCTemplate = ({ title, tagline, logo_url, color_palette, markdown,
             {logo_url && (
               <div className="shrink-0">
                 <div className="w-24 h-24 rounded-xl bg-black/60 border-2 border-red-600 p-3 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
-                  <img src={logo_url} alt="Logo" className="w-full h-full object-contain" />
+                  <RobustImage 
+                    src={logo_url} 
+                    alt="Logo" 
+                    className="w-full h-full object-contain" 
+                  />
                 </div>
               </div>
             )}
@@ -49,7 +54,12 @@ export const UFCTemplate = ({ title, tagline, logo_url, color_palette, markdown,
             {avatar && (
               <div className="lg:w-56">
                 <div className="relative overflow-hidden rounded-2xl border-2 border-red-600/70 bg-black/50 shadow-[0_0_40px_rgba(239,68,68,0.35)]">
-                  <img src={avatar.url} alt={avatar.alt} className="h-72 w-full object-cover" />
+                  <RobustImage 
+                    src={avatar.url} 
+                    alt={avatar.alt} 
+                    className="h-72 w-full object-cover"
+                    fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjY0MCIgdmlld0JveD0iMCAwIDY0MCA2NDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNjQwIiBmaWxsPSIjMUYyOTM3Ii8+CjxjaXJjbGUgY3g9IjMyMCIgY3k9IjI0MCIgcj0iODAiIGZpbGw9IiNEQzI2MjYiLz4KPHJlY3QgeD0iMjQwIiB5PSIzNjAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjAwIiByeD0iMjAiIGZpbGw9IiNEQzI2MjYiLz4KPHRleHQgeD0iMzIwIiB5PSI1MDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GSUdIVEVSPC90ZXh0Pgo8L3N2Zz4K"
+                  />
                   {avatar.showPersonalizationHint && (
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-black/80 flex items-end">
                       <p className="w-full px-4 pb-4 text-xs font-medium uppercase tracking-wide text-red-100 text-center">

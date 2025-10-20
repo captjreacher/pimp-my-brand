@@ -1,5 +1,7 @@
 /* Admin Panel Styles */
 @import './styles/admin.css';
+@import './styles/clean-admin.css';
+@import './styles/admin-theme-override.css';
 
 @tailwind base;
 @tailwind components;

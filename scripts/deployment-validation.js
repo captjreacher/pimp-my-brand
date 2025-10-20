@@ -70,9 +70,12 @@ class DeploymentValidator {
     
     const requiredVars = [
       'VITE_SUPABASE_URL',
-      'VITE_SUPABASE_ANON_KEY',
-      'SUPABASE_SERVICE_ROLE_KEY',
-      'LOVABLE_API_KEY'
+      'VITE_SUPABASE_PUBLISHABLE_KEY',
+      'SUPABASE_SERVICE_ROLE_KEY'
+    ];
+
+    const optionalButRecommendedVars = [
+      'OPENAI_API_KEY'
     ];
 
     const optionalVars = [
@@ -87,6 +90,16 @@ class DeploymentValidator {
       } else {
         this.errors.push(`Missing required environment variable: ${varName}`);
         log.error(`${varName} is missing`);
+      }
+    }
+
+    // Check optional but recommended variables
+    for (const varName of optionalButRecommendedVars) {
+      if (process.env[varName]) {
+        log.success(`${varName} is set`);
+      } else {
+        this.warnings.push(`AI features require: ${varName} (get from OpenAI dashboard)`);
+        log.warning(`${varName} is not set - AI features will not work`);
       }
     }
 
@@ -115,7 +128,7 @@ class DeploymentValidator {
   async validateSupabaseConnection() {
     log.header('Supabase Connection');
     
-    if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
+    if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
       this.errors.push('Cannot test Supabase connection - missing credentials');
       return;
     }
@@ -123,7 +136,7 @@ class DeploymentValidator {
     try {
       this.supabase = createClient(
         process.env.VITE_SUPABASE_URL,
-        process.env.VITE_SUPABASE_ANON_KEY
+        process.env.VITE_SUPABASE_PUBLISHABLE_KEY
       );
 
       // Test connection

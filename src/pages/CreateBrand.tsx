@@ -57,17 +57,17 @@ export default function CreateBrand() {
 
   if (hasError) {
     return (
-      <div className="min-h-screen bg-background py-12">
+      <div className="min-h-screen bg-black py-12">
         <div className="container max-w-4xl mx-auto px-4">
-          <div className="bg-surface/50 border border-border rounded-2xl p-8 shadow-lg">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg">
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="w-8 h-8 text-red-600" />
+              <div className="w-16 h-16 mx-auto bg-red-900 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-8 h-8 text-red-400" />
               </div>
               
               <div className="space-y-2">
-                <h2 className="font-heading text-3xl text-foreground">Something went wrong</h2>
-                <p className="text-muted-foreground max-w-md mx-auto">
+                <h2 className="font-heading text-3xl text-white">Something went wrong</h2>
+                <p className="text-gray-300 max-w-md mx-auto">
                   We encountered an error while loading the brand creation wizard. This might be due to a temporary issue.
                 </p>
               </div>
@@ -86,7 +86,7 @@ export default function CreateBrand() {
                 </Button>
               </div>
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-400">
                 If this problem persists, please try refreshing the page or contact support.
               </p>
             </div>
@@ -97,7 +97,7 @@ export default function CreateBrand() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-black py-12">
       <div className="container max-w-4xl mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           {step < 4 && (
@@ -121,17 +121,7 @@ export default function CreateBrand() {
           </div>
         </div>
 
-        <div className="bg-surface/50 border border-border rounded-2xl p-8 shadow-lg">
-          <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded">
-            <div className="text-red-400 text-sm mb-2">DEBUG CONTROLS</div>
-            <div className="flex gap-2 mb-2">
-              <button onClick={() => setStep(1)} className="bg-blue-600 text-white px-2 py-1 rounded text-xs">Step 1</button>
-              <button onClick={() => setStep(2)} className="bg-blue-600 text-white px-2 py-1 rounded text-xs">Step 2</button>
-              <button onClick={() => setStep(3)} className="bg-blue-600 text-white px-2 py-1 rounded text-xs">Step 3</button>
-              <button onClick={() => setStep(4)} className="bg-blue-600 text-white px-2 py-1 rounded text-xs">Step 4</button>
-            </div>
-            <div className="text-xs text-red-300">Current: Step {step}, Corpus: {corpus.length} chars, Uploads: {uploadIds.length}</div>
-          </div>
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg">
           
           {/* Enhanced Progress indicator */}
           <div className="mb-8">
@@ -191,39 +181,27 @@ export default function CreateBrand() {
             }
           >
             {step === 1 && (
-              <div>
-                <div style={{ color: 'red', marginBottom: '1rem' }}>DEBUG: Rendering UploadStep (Step 1)</div>
-                <UploadStep onComplete={handleUploadComplete} />
-              </div>
+              <UploadStep onComplete={handleUploadComplete} />
             )}
             {step === 2 && (
-              <div>
-                <div style={{ color: 'red', marginBottom: '1rem' }}>DEBUG: Rendering FormatStep (Step 2)</div>
-                <FormatStep onComplete={handleFormatComplete} />
-              </div>
+              <FormatStep onComplete={handleFormatComplete} />
             )}
             {step === 3 && (
-              <div>
-                <div style={{ color: 'red', marginBottom: '1rem' }}>DEBUG: Rendering LogoStep (Step 3)</div>
-                <LogoStep 
-                  brandData={brandData}
-                  onComplete={handleLogoComplete}
-                  onSkip={() => handleLogoComplete(null)}
-                />
-              </div>
+              <LogoStep 
+                brandData={brandData}
+                onComplete={handleLogoComplete}
+                onSkip={() => handleLogoComplete(null)}
+              />
             )}
             {step === 4 && (
-              <div>
-                <div style={{ color: 'red', marginBottom: '1rem' }}>DEBUG: Rendering GenerateStep (Step 4)</div>
-                <GenerateStep
-                  corpus={corpus}
-                  uploadIds={uploadIds}
-                  format={format}
-                  logoUrl={logoUrl}
-                  onComplete={handleGenerateComplete}
-                  onBrandDataGenerated={setBrandData}
-                />
-              </div>
+              <GenerateStep
+                corpus={corpus}
+                uploadIds={uploadIds}
+                format={format}
+                logoUrl={logoUrl}
+                onComplete={handleGenerateComplete}
+                onBrandDataGenerated={setBrandData}
+              />
             )}
           </Suspense>
         </div>

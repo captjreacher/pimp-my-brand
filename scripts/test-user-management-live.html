@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User Management - Live</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>User Management Service Test - Live</h1>
+    
+    <div id="status">Testing...</div>
+    <div id="results"></div>
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const supabase = createClient(
+            'https://qnvihygrnfgpmsznayje.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFudmloeWdybmZncG1zem5heWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MzU4OTksImV4cCI6MjA3NjIxMTg5OX0.uA3phIwQxs26Upfw4EKPzxP3VxKqzLV4Dm9cx7nGZdw'
+        );
+        
+        async function testUserManagement() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                statusDiv.innerHTML = '<span class="info">Testing direct profiles access...</span>';
+                
+                // Test the exact same query the service uses
+                let query = supabase
+                    .from('profiles')
+                    .select('id, email, full_name, app_role, subscription_tier, created_at, updated_at, is_suspended, suspended_at, suspended_by, suspension_reason, admin_notes, last_admin_action');
+
+                query = query
+                    .order('created_at', { ascending: false })
+                    .range(0, 49);
+
+                const { data: profilesData, error: profilesError } = await query;
+                
+                if (profilesError) {
+                    statusDiv.innerHTML = '<span class="error">❌ Query failed: ' + profilesError.message + '</span>';
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<span class="success">✅ Query successful!</span>';
+                
+                // Convert data like the service does
+                const convertedData = profilesData?.map(profile => ({
+                    id: profile.id,
+                    email: profile.email,
+                    full_name: profile.full_name,
+                    app_role: profile.app_role || 'user',
+                    subscription_tier: profile.subscription_tier || 'free',
+                    created_at: profile.created_at,
+                    last_sign_in: profile.updated_at,
+                    is_suspended: profile.is_suspended || false,
+                    suspended_at: profile.suspended_at,
+                    suspended_by: profile.suspended_by,
+                    suspension_reason: profile.suspension_reason,
+                    admin_notes: profile.admin_notes,
+                    last_admin_action: profile.last_admin_action,
+                    content_count: 0,
+                    total_generations: 0
+                })) || [];
+                
+                // Display results
+                resultsDiv.innerHTML = `
+                    <h2>Results:</h2>
+                    <p><strong>Number of users found:</strong> ${convertedData.length}</p>
+                    <h3>User Data:</h3>
+                    <pre>${JSON.stringify(convertedData, null, 2)}</pre>
+                `;
+                
+                // Test user stats
+                const { data: totalUsers } = await supabase.from('profiles').select('id');
+                const { data: activeUsers } = await supabase.from('profiles').select('id').eq('is_suspended', false);
+                const { data: adminUsers } = await supabase.from('profiles').select('id').in('app_role', ['admin', 'moderator', 'super_admin']);
+                
+                resultsDiv.innerHTML += `
+                    <h3>User Statistics:</h3>
+                    <ul>
+                        <li>Total users: ${totalUsers?.length || 0}</li>
+                        <li>Active users: ${activeUsers?.length || 0}</li>
+                        <li>Admin users: ${adminUsers?.length || 0}</li>
+                    </ul>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+                console.error('Error:', error);
+            }
+        }
+        
+        // Run the test
+        testUserManagement();
+    </script>
+    
+    <h2>Instructions:</h2>
+    <ol>
+        <li>This test simulates exactly what the user management service does</li>
+        <li>If this works, the service should work too</li>
+        <li>Try refreshing your admin page with Ctrl+F5 (hard refresh)</li>
+        <li>Or try opening the admin page in an incognito/private window</li>
+    </ol>
+</body>
+</html>

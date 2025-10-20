@@ -45,6 +45,7 @@ class UserManagementAPI {
     users: AdminUserView[];
     total: number;
     hasMore: boolean;
+    isUsingDemoData: boolean;
   }> {
     try {
       const filters: UserFilters = {
@@ -80,8 +81,9 @@ class UserManagementAPI {
 
       return {
         users,
-        total,
-        hasMore
+        total: userManagementService.isUsingDemoData ? users.length : total,
+        hasMore: userManagementService.isUsingDemoData ? false : hasMore,
+        isUsingDemoData: userManagementService.isUsingDemoData
       };
     } catch (error) {
       console.error('Error searching users:', error);

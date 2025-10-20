@@ -9,8 +9,8 @@ import { LoadingSkeleton } from "./components/ui/loading-skeleton";
 import { preloadCriticalResources } from "./lib/performance/preloader";
 import { initializePerformanceObserver } from "./lib/performance/bundle-analyzer";
 import { useWebVitals } from "./hooks/use-performance";
+// Admin context and route guards
 import { AdminProvider } from "./contexts/AdminContext";
-import { AdminRouteGuard } from "./components/admin/AdminRouteGuard";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -31,18 +31,10 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Profile = lazy(() => import("./pages/Profile"));
 const PlayerProfile = lazy(() => import("./pages/PlayerProfile"));
 const Shop = lazy(() => import("./pages/Shop"));
-const AdminAccess = lazy(() => import("./pages/AdminAccess"));
-const AdminDebug = lazy(() => import("./pages/AdminDebug"));
+const VoiceSynthesisDemo = lazy(() => import("./pages/VoiceSynthesisDemo"));
 
-// Admin pages
-const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage"));
-const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").then(module => ({ default: module.UserManagementPage })));
-const SubscriptionManagementPage = lazy(() => import("./pages/admin/SubscriptionManagementPage").then(module => ({ default: module.SubscriptionManagementPage })));
-const ContentModerationPage = lazy(() => import("./pages/admin/ContentModerationPage").then(module => ({ default: module.ContentModerationPage })));
-const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
-const SystemConfigPage = lazy(() => import("./pages/admin/SystemConfigPage").then(module => ({ default: module.SystemConfigPage })));
-const SecurityPage = lazy(() => import("./pages/admin/SecurityPage"));
-const CommunicationPage = lazy(() => import("./pages/admin/CommunicationPage"));
+// Unified Admin Components
+const UnifiedAdminRouter = lazy(() => import("./components/admin/UnifiedAdminRouter").then(module => ({ default: module.UnifiedAdminRouter })));
 
 const queryClient = createOptimizedQueryClient();
 
@@ -61,11 +53,12 @@ const App = () => {
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Suspense fallback={<LoadingSkeleton />}>
-          <Routes>
+      <AdminProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Suspense fallback={<LoadingSkeleton />}>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
@@ -83,62 +76,19 @@ const App = () => {
             <Route path="/cv/:id" element={<CVView />} />
             <Route path="/uploads" element={<Uploads />} />
             <Route path="/shop" element={<Shop />} />
-            <Route path="/admin-access" element={<AdminAccess />} />
-            <Route path="/admin-debug" element={<AdminDebug />} />
+            <Route path="/voice-demo" element={<VoiceSynthesisDemo />} />
             
-            {/* Admin Routes */}
-            <Route path="/admin/*" element={
-              <AdminProvider>
-                <Routes>
-                  <Route path="/" element={
-                    <AdminRouteGuard requiredPermissions={['view_analytics']}>
-                      <AdminDashboardPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/users" element={
-                    <AdminRouteGuard requiredPermissions={['manage_users']}>
-                      <UserManagementPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/subscriptions" element={
-                    <AdminRouteGuard requiredPermissions={['manage_billing']}>
-                      <SubscriptionManagementPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/moderation" element={
-                    <AdminRouteGuard requiredPermissions={['moderate_content']}>
-                      <ContentModerationPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/analytics" element={
-                    <AdminRouteGuard requiredPermissions={['view_analytics']}>
-                      <AnalyticsPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/config" element={
-                    <AdminRouteGuard requiredPermissions={['manage_system']}>
-                      <SystemConfigPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/security" element={
-                    <AdminRouteGuard requiredPermissions={['manage_system']}>
-                      <SecurityPage />
-                    </AdminRouteGuard>
-                  } />
-                  <Route path="/communication" element={
-                    <AdminRouteGuard requiredPermissions={['manage_users']}>
-                      <CommunicationPage />
-                    </AdminRouteGuard>
-                  } />
-                </Routes>
-              </AdminProvider>
-            } />
+            {/* Unified Admin Routes */}
+            <Route path="/admin/*" element={<UnifiedAdminRouter />} />
+            
+
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AdminProvider>
     </TooltipProvider>
   </QueryClientProvider>
   );

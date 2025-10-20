@@ -1,5 +1,5 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "funkmybrand",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,7 +12,11 @@
     "test": "vitest",
     "test:run": "vitest run",
     "validate:deployment": "node scripts/deployment-validation.js",
-    "deploy:check": "npm run test:run && npm run lint && npm run validate:deployment && npm run build"
+    "deploy:check": "npm run test:run && npm run lint && npm run validate:deployment && npm run build",
+    "deploy:spaceship": "powershell -ExecutionPolicy Bypass -File scripts/deploy-to-spaceship.ps1",
+    "deploy:spaceship:skip-tests": "powershell -ExecutionPolicy Bypass -File scripts/deploy-to-spaceship.ps1 -SkipTests",
+    "migrate:from-vercel": "node scripts/migrate-from-vercel.js",
+    "setup:openai": "echo 'OpenAI setup complete! Check OPENAI_SETUP.md for next steps'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -44,12 +48,13 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@stripe/stripe-js": "^8.0.0",
-    "@supabase/supabase-js": "^2.58.0",
+    "@supabase/supabase-js": "^2.75.0",
     "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",

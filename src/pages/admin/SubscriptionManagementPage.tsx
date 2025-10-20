@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,8 @@ import {
   Users, 
   AlertTriangle,
   Download,
-  RefreshCw 
+  RefreshCw,
+  Settings
 } from 'lucide-react';
 import { SubscriptionDashboard } from '@/components/admin/subscriptions/SubscriptionDashboard';
 import { SubscriptionTable } from '@/components/admin/subscriptions/SubscriptionTable';
@@ -21,8 +22,12 @@ import { SubscriptionDetailsModal } from '@/components/admin/subscriptions/Subsc
 import { RefundDialog } from '@/components/admin/subscriptions/workflows/RefundDialog';
 import { ModifySubscriptionDialog } from '@/components/admin/subscriptions/workflows/ModifySubscriptionDialog';
 import { ResolveBillingIssueDialog } from '@/components/admin/subscriptions/workflows/ResolveBillingIssueDialog';
+import { SubscriptionPlansOverview } from '@/components/admin/subscriptions/SubscriptionPlansOverview';
+import { PlanManagementDialog, SubscriptionPlan } from '@/components/admin/subscriptions/PlanManagementDialog';
+import { TrialConfigurationDialog } from '@/components/admin/subscriptions/TrialConfigurationDialog';
 import { useSubscriptionManagement } from '@/hooks/use-subscription-management';
 import { AdminSubscriptionView, BillingIssue, RefundRequest, SubscriptionModification } from '@/lib/admin/types/subscription-types';
+import { SubscriptionPlansService } from '@/lib/admin/subscription-plans-service';
 import { toast } from 'sonner';
 
 export function SubscriptionManagementPage() {
@@ -54,6 +59,24 @@ export function SubscriptionManagementPage() {
     isModifyingSubscription,
   } = useSubscriptionManagement();
 
+  // Load subscription plans
+  useEffect(() => {
+    loadSubscriptionPlans();
+  }, []);
+
+  const loadSubscriptionPlans = async () => {
+    try {
+      setPlansLoading(true);
+      const plans = await SubscriptionPlansService.getAllPlans();
+      setSubscriptionPlans(plans);
+    } catch (error) {
+      console.error('Error loading subscription plans:', error);
+      toast.error('Failed to load subscription plans');
+    } finally {
+      setPlansLoading(false);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('overview');
   
   // Dialog states
@@ -63,6 +86,13 @@ export function SubscriptionManagementPage() {
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [showModifyDialog, setShowModifyDialog] = useState(false);
   const [showResolveIssueDialog, setShowResolveIssueDialog] = useState(false);
+
+  // Plan management states
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [showTrialDialog, setShowTrialDialog] = useState(false);
+  const [plansLoading, setPlansLoading] = useState(false);
 
   const handleViewDetails = (subscription: AdminSubscriptionView) => {
     setSelectedSubscription(subscription);
@@ -131,6 +161,65 @@ export function SubscriptionManagementPage() {
     toast.info('Exporting subscription data...');
   };
 
+  // Plan management handlers
+  const handleCreatePlan = () => {
+    setSelectedPlan(null);
+    setShowPlanDialog(true);
+  };
+
+  const handleEditPlan = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setShowPlanDialog(true);
+  };
+
+  const handleSavePlan = async (planData: Partial<SubscriptionPlan>) => {
+    try {
+      if (selectedPlan) {
+        await SubscriptionPlansService.updatePlan(selectedPlan.id, planData);
+      } else {
+        await SubscriptionPlansService.createPlan(planData);
+      }
+      await loadSubscriptionPlans();
+    } catch (error) {
+      console.error('Error saving plan:', error);
+      throw error;
+    }
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      await SubscriptionPlansService.deletePlan(planId);
+      await loadSubscriptionPlans();
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      throw error;
+    }
+  };
+
+  const handleTogglePlanStatus = async (planId: string, isActive: boolean) => {
+    try {
+      await SubscriptionPlansService.togglePlanStatus(planId, isActive);
+      await loadSubscriptionPlans();
+    } catch (error) {
+      console.error('Error toggling plan status:', error);
+      throw error;
+    }
+  };
+
+  const handleConfigureTrials = () => {
+    setShowTrialDialog(true);
+  };
+
+  const handleUpdateTrialPeriod = async (planId: string, trialDays: number) => {
+    try {
+      await SubscriptionPlansService.updateTrialPeriod(planId, trialDays);
+      await loadSubscriptionPlans();
+    } catch (error) {
+      console.error('Error updating trial period:', error);
+      throw error;
+    }
+  };
+
   const totalPages = Math.ceil(totalSubscriptions / 20);
 
   return (
@@ -164,6 +253,11 @@ export function SubscriptionManagementPage() {
                 <TrendingUp className="h-4 w-4" />
                 Overview
               </TabsTrigger>
+              <TabsTrigger value="plans" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Plans
+                <Badge variant="secondary">{subscriptionPlans.length}</Badge>
+              </TabsTrigger>
               <TabsTrigger value="subscriptions" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Subscriptions
@@ -194,6 +288,19 @@ export function SubscriptionManagementPage() {
                   isLoading={billingIssuesLoading}
                 />
               )}
+            </TabsContent>
+
+            {/* Plans Tab */}
+            <TabsContent value="plans" className="space-y-6">
+              <SubscriptionPlansOverview
+                plans={subscriptionPlans}
+                onCreatePlan={handleCreatePlan}
+                onEditPlan={handleEditPlan}
+                onDeletePlan={handleDeletePlan}
+                onTogglePlanStatus={handleTogglePlanStatus}
+                onConfigureTrials={handleConfigureTrials}
+                isLoading={plansLoading}
+              />
             </TabsContent>
 
             {/* Subscriptions Tab */}
@@ -346,6 +453,25 @@ export function SubscriptionManagementPage() {
               setSelectedBillingIssue(null);
             }}
             onResolve={handleConfirmResolveIssue}
+          />
+
+          <PlanManagementDialog
+            plan={selectedPlan}
+            isOpen={showPlanDialog}
+            onClose={() => {
+              setShowPlanDialog(false);
+              setSelectedPlan(null);
+            }}
+            onSave={handleSavePlan}
+            isLoading={plansLoading}
+          />
+
+          <TrialConfigurationDialog
+            plans={subscriptionPlans}
+            isOpen={showTrialDialog}
+            onClose={() => setShowTrialDialog(false)}
+            onUpdateTrialPeriod={handleUpdateTrialPeriod}
+            isLoading={plansLoading}
           />
         </div>
       </PermissionGate>

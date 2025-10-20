@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { SubscriptionTier } from "@/lib/subscription-tiers";
+import { SubscriptionService } from "@/lib/subscription-service";
+
+type SubscriptionTier = "free" | "pro" | "premium";
 
 interface SubscriptionContextType {
   tier: SubscriptionTier;
@@ -22,31 +24,32 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         setTier("free");
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("check-subscription", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (error) throw error;
-
-      setTier(data.tier || "free");
-      setTrialActive(data.trial_active || false);
-      setSubscriptionEnd(data.subscription_end);
+      const subscription = await SubscriptionService.getUserSubscription(user.id);
+      
+      if (subscription) {
+        setTier(subscription.plan as SubscriptionTier);
+        setTrialActive(false); // We'll implement trials later if needed
+        setSubscriptionEnd(subscription.current_period_end);
+      } else {
+        // Create default subscription if none exists
+        await SubscriptionService.createDefaultSubscription(user.id);
+        setTier("free");
+        setTrialActive(false);
+        setSubscriptionEnd(null);
+      }
     } catch (error) {
       console.error("Failed to check subscription:", error);
-      toast({
-        title: "Error",
-        description: "Failed to verify subscription status",
-        variant: "destructive",
-      });
+      // Don't show error toast, just set to free tier
+      setTier("free");
+      setTrialActive(false);
+      setSubscriptionEnd(null);
     } finally {
       setLoading(false);
     }
