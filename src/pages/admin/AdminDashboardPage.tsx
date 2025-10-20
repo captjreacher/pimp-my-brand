@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminDashboardErrorBoundary } from '@/components/admin/AdminErrorBoundary';
 import { useAdminErrorHandler } from '@/hooks/use-admin-error-handler';
@@ -143,6 +143,13 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const activeUsersPercentage = useMemo(() => {
+    if (!stats || stats.totalUsers === 0) {
+      return 0;
+    }
+    return (stats.activeUsers / stats.totalUsers) * 100;
+  }, [stats]);
+
   const getVariantColor = (variant: 'success' | 'warning' | 'error') => {
     switch (variant) {
       case 'success':
@@ -241,7 +248,7 @@ export default function AdminDashboardPage() {
                   {statsLoading ? '...' : stats?.activeUsers.toLocaleString()}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {stats && ((stats.activeUsers / stats.totalUsers) * 100).toFixed(1)}% of total users
+                  {statsLoading ? '...' : `${activeUsersPercentage.toFixed(1)}% of total users`}
                 </p>
               </CardContent>
             </Card>

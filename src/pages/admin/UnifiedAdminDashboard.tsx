@@ -68,6 +68,7 @@ export default function UnifiedAdminDashboard() {
 
   const loadAllAdminData = async () => {
     setLoading(true);
+    let success = false;
     try {
       const [statsData, contentData, subscriptionsData, plansData] = await Promise.all([
         consolidatedAdminService.getAdminStats(),
@@ -80,17 +81,21 @@ export default function UnifiedAdminDashboard() {
       setContentItems(contentData);
       setSubscriptions(subscriptionsData);
       setPlans(plansData);
+      success = true;
     } catch (error) {
       console.error('Error loading admin data:', error);
       toast.error('Failed to load admin data');
     } finally {
       setLoading(false);
     }
+    return success;
   };
 
   const handleRefreshData = async () => {
-    await loadAllAdminData();
-    toast.success('Admin data refreshed!');
+    const success = await loadAllAdminData();
+    if (success) {
+      toast.success('Admin data refreshed!');
+    }
   };
 
   const handleApproveContent = async (id: string) => {
