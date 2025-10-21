@@ -137,11 +137,11 @@ export async function logAdminAction(
   targetType?: string,
   targetId?: string,
   details?: Record<string, any>
-): Promise<void> {
+): Promise<string | null> {
+  const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Server';
+
   try {
-    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Server';
-    
-    const { error } = await supabase.rpc('log_admin_action', {
+    const { data, error } = await supabase.rpc('log_admin_action', {
       p_action_type: actionType,
       p_target_type: targetType,
       p_target_id: targetId,
@@ -150,10 +150,19 @@ export async function logAdminAction(
     });
 
     if (error) {
-      console.error('Failed to log admin action:', error);
+      throw error;
     }
-  } catch (error) {
-    console.error('Admin action logging error:', error);
+
+    return data ?? null;
+  } catch (err) {
+    console.error('Failed to log admin action:', {
+      actionType,
+      targetType,
+      targetId,
+      details,
+      error: err
+    });
+    throw err;
   }
 }
 

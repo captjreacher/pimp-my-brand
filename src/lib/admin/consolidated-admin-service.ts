@@ -317,13 +317,16 @@ class ConsolidatedAdminService {
    */
   async approveContent(contentId: string, adminId: string): Promise<boolean> {
     try {
-      await supabase.from('admin_audit_log').insert({
+      const { error } = await supabase.from('admin_audit_log').insert({
         action_type: 'content_approved',
         admin_user_id: adminId,
         target_id: contentId,
         target_type: 'content',
         details: { action: 'approve', content_id: contentId }
       });
+      if (error) {
+        throw error;
+      }
       return true;
     } catch (error) {
       const adminError = adminErrorHandler.handleServiceError(error, 'approve content');
@@ -334,13 +337,16 @@ class ConsolidatedAdminService {
 
   async rejectContent(contentId: string, adminId: string, reason: string): Promise<boolean> {
     try {
-      await supabase.from('admin_audit_log').insert({
+      const { error } = await supabase.from('admin_audit_log').insert({
         action_type: 'content_rejected',
         admin_user_id: adminId,
         target_id: contentId,
         target_type: 'content',
         details: { action: 'reject', content_id: contentId, reason }
       });
+      if (error) {
+        throw error;
+      }
       return true;
     } catch (error) {
       const adminError = adminErrorHandler.handleServiceError(error, 'reject content');
@@ -351,13 +357,16 @@ class ConsolidatedAdminService {
 
   async retryPayment(subscriptionId: string, adminId: string): Promise<boolean> {
     try {
-      await supabase.from('admin_audit_log').insert({
+      const { error } = await supabase.from('admin_audit_log').insert({
         action_type: 'payment_retry',
         admin_user_id: adminId,
         target_id: subscriptionId,
         target_type: 'subscription',
         details: { action: 'retry_payment', subscription_id: subscriptionId }
       });
+      if (error) {
+        throw error;
+      }
       return true;
     } catch (error) {
       const adminError = adminErrorHandler.handleServiceError(error, 'retry payment');

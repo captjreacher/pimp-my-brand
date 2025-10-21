@@ -218,7 +218,7 @@ export class SubscriptionManagementAPI {
       }
 
       // Log the admin action
-      await supabase.rpc('log_admin_action', {
+      const { error: logError } = await supabase.rpc('log_admin_action', {
         p_admin_user_id: adminUserId,
         p_action_type: 'refund_processed',
         p_target_type: 'subscription',
@@ -229,6 +229,10 @@ export class SubscriptionManagementAPI {
           reason: request.reason,
         },
       });
+
+      if (logError) {
+        throw logError;
+      }
 
       return true;
     } catch (error) {
@@ -264,7 +268,7 @@ export class SubscriptionManagementAPI {
       if (error) throw error;
 
       // Log the admin action
-      await supabase.rpc('log_admin_action', {
+      const { error: logError } = await supabase.rpc('log_admin_action', {
         p_admin_user_id: adminUserId,
         p_action_type: 'subscription_modified',
         p_target_type: 'subscription',
@@ -275,6 +279,10 @@ export class SubscriptionManagementAPI {
           prorate: modification.prorate,
         },
       });
+
+      if (logError) {
+        throw logError;
+      }
 
       return true;
     } catch (error) {
@@ -317,7 +325,7 @@ export class SubscriptionManagementAPI {
       if (error) throw error;
 
       // Log the admin action
-      await supabase.rpc('log_admin_action', {
+      const { error: logError } = await supabase.rpc('log_admin_action', {
         p_admin_user_id: adminUserId,
         p_action_type: 'subscription_canceled',
         p_target_type: 'subscription',
@@ -327,6 +335,10 @@ export class SubscriptionManagementAPI {
           canceled_at: immediately ? new Date().toISOString() : null,
         },
       });
+
+      if (logError) {
+        throw logError;
+      }
 
       return true;
     } catch (error) {
