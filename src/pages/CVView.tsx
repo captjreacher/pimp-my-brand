@@ -63,6 +63,22 @@ export default function CVView() {
     loadCV();
   }, [id]);
 
+  const normalizeCV = (data: any) => {
+    if (!data) return null;
+
+    const experience = Array.isArray(data.experience) ? data.experience : [];
+    const skills = Array.isArray(data.skills) ? data.skills : [];
+    const links = Array.isArray(data.links) ? data.links : [];
+
+    return {
+      ...data,
+      experience,
+      skills,
+      links,
+      format: data.format ?? data.format_preset ?? "custom",
+    };
+  };
+
   const loadCV = async () => {
     try {
       const { data, error } = await supabase
@@ -72,7 +88,7 @@ export default function CVView() {
         .single();
 
       if (error) throw error;
-      setCV(data);
+      setCV(normalizeCV(data));
     } catch (error: any) {
       console.error("Load error:", error);
       toast.error("Failed to load CV");
@@ -120,7 +136,7 @@ export default function CVView() {
 
       if (error) throw error;
 
-      setCV(updatedCV);
+      setCV(normalizeCV(updatedCV));
       toast.success("CV updated");
       setIsEditOpen(false);
     } catch (error: any) {
@@ -132,7 +148,7 @@ export default function CVView() {
   };
 
   const handleCVChange = (updatedCV: any) => {
-    setCV(updatedCV);
+    setCV(normalizeCV(updatedCV));
   };
 
   const handleCVSave = async (updatedCV: any) => {
