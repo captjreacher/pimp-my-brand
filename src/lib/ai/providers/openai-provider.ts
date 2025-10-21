@@ -1,3 +1,4 @@
+import { supabase } from '@/integrations/supabase/client';
 import { AIProvider, GenerationOptions, GenerationResult, ImageGenerationRequest, VoiceGenerationRequest, VideoGenerationRequest } from '../types';
 
 export interface OpenAIConfig {
@@ -170,13 +171,31 @@ export class OpenAIProvider extends AIProvider {
   }
 
   private async uploadAudioToStorage(audioBlob: Blob, userId?: string): Promise<string> {
-    // This would integrate with Supabase storage
-    // For now, return a placeholder URL
-    const filename = `audio_${Date.now()}.mp3`;
-    const path = userId ? `${userId}/${filename}` : filename;
-    
-    // TODO: Implement actual Supabase storage upload
-    return `https://placeholder-storage.com/generated-assets/${path}`;
+    const filename = `voice_${Date.now()}.mp3`;
+    const storagePath = userId ? `${userId}/generated-audio/${filename}` : `public/generated-audio/${filename}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('generated-assets')
+      .upload(storagePath, audioBlob, {
+        contentType: 'audio/mpeg',
+        cacheControl: '3600'
+      });
+
+    if (uploadError) {
+      console.error('Failed to upload audio to storage:', uploadError);
+      throw new Error('Failed to store generated audio');
+    }
+
+    const { data: publicData } = supabase.storage
+      .from('generated-assets')
+      .getPublicUrl(storagePath);
+
+    if (!publicData?.publicUrl) {
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+      return `${baseUrl}/storage/v1/object/public/generated-assets/${storagePath}`;
+    }
+
+    return publicData.publicUrl;
   }
 
   private calculateImageCost(options: any): number {
