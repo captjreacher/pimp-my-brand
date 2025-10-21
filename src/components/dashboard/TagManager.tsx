@@ -29,10 +29,23 @@ import {
   Filter
 } from 'lucide-react';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type BrandRow = Database['public']['Tables']['brands']['Row'] & {
+  tags?: string[] | null;
+  is_favorite?: boolean | null;
+};
+
+type CVRow = Database['public']['Tables']['cvs']['Row'] & {
+  tags?: string[] | null;
+  is_favorite?: boolean | null;
+};
+
+type TaggableItem = BrandRow | CVRow;
 
 interface TagManagerProps {
   contentType: 'brands' | 'cvs';
-  items: any[];
+  items: TaggableItem[];
   onTagsUpdate: (itemId: string, tags: string[]) => Promise<void>;
   onFavoriteToggle: (itemId: string, isFavorite: boolean) => Promise<void>;
 }
@@ -58,7 +71,7 @@ export function TagManager({ contentType, items, onTagsUpdate, onFavoriteToggle 
     const uniqueTags = new Set<string>();
 
     items.forEach(item => {
-      const tags = item.tags || [];
+      const tags = item.tags ?? [];
       tags.forEach((tag: string) => {
         uniqueTags.add(tag);
         tagCounts[tag] = (tagCounts[tag] || 0) + 1;
@@ -95,7 +108,7 @@ export function TagManager({ contentType, items, onTagsUpdate, onFavoriteToggle 
     return matchesTag && matchesFavorite;
   });
 
-  const favoriteItems = items.filter(item => item.is_favorite);
+  const favoriteItems = items.filter(item => Boolean(item.is_favorite));
 
   return (
     <div className="space-y-6">
@@ -207,7 +220,7 @@ export function TagManager({ contentType, items, onTagsUpdate, onFavoriteToggle 
 }
 
 interface TaggedItemCardProps {
-  item: any;
+  item: TaggableItem;
   contentType: 'brands' | 'cvs';
   allTags: string[];
   onTagsUpdate: (itemId: string, tags: string[]) => Promise<void>;
@@ -225,7 +238,7 @@ function TaggedItemCard({
 }: TaggedItemCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTag, setNewTag] = useState('');
-  const [itemTags, setItemTags] = useState<string[]>(item.tags || []);
+  const [itemTags, setItemTags] = useState<string[]>(item.tags ?? []);
 
   const handleAddTag = async () => {
     if (!newTag.trim() || itemTags.includes(newTag.trim())) return;
@@ -236,10 +249,11 @@ function TaggedItemCard({
 
     try {
       await onTagsUpdate(item.id, updatedTags);
-      toast.success('Tag added successfully');
     } catch (error) {
       setItemTags(itemTags);
-      toast.error('Failed to add tag');
+      if (!(error as any)?.handled) {
+        toast.error('Failed to add tag');
+      }
     }
   };
 
@@ -249,19 +263,21 @@ function TaggedItemCard({
 
     try {
       await onTagsUpdate(item.id, updatedTags);
-      toast.success('Tag removed successfully');
     } catch (error) {
       setItemTags(itemTags);
-      toast.error('Failed to remove tag');
+      if (!(error as any)?.handled) {
+        toast.error('Failed to remove tag');
+      }
     }
   };
 
   const handleFavoriteToggle = async () => {
     try {
-      await onFavoriteToggle(item.id, !item.is_favorite);
-      toast.success(item.is_favorite ? 'Removed from favorites' : 'Added to favorites');
+      await onFavoriteToggle(item.id, !Boolean(item.is_favorite));
     } catch (error) {
-      toast.error('Failed to update favorite status');
+      if (!(error as any)?.handled) {
+        toast.error('Failed to update favorite status');
+      }
     }
   };
 
@@ -274,7 +290,7 @@ function TaggedItemCard({
               {item.title || `Untitled ${contentType.slice(0, -1)}`}
             </h4>
             <p className="text-sm text-muted-foreground mt-1">
-              {contentType === 'brands' ? item.tagline : item.summary}
+              {'tagline' in item ? item.tagline : item.summary}
             </p>
           </div>
           <Button
