@@ -38,7 +38,7 @@ export const useAIPerformance = () => {
     tags?: Record<string, any>
   ) => {
     try {
-      await supabase
+      const { data, error } = await supabase
         .from('ai_performance_metrics')
         .insert({
           metric_type: type,
@@ -47,6 +47,10 @@ export const useAIPerformance = () => {
           unit,
           tags: tags || {}
         })
+
+      if (error) throw error
+
+      return data
     } catch (error) {
       console.error('Failed to record performance metric:', error)
     }
