@@ -5,10 +5,23 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+// Provide sensible fallbacks during local development so the admin dashboard can render
+const FALLBACK_SUPABASE_URL = 'https://offline.supabase.local';
+const FALLBACK_SUPABASE_KEY = 'public-offline-key';
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.warn(
+    '[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY. Using offline fallback client.'
+  );
+}
+
+const resolvedSupabaseUrl = SUPABASE_URL || FALLBACK_SUPABASE_URL;
+const resolvedSupabaseKey = SUPABASE_PUBLISHABLE_KEY || FALLBACK_SUPABASE_KEY;
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(resolvedSupabaseUrl, resolvedSupabaseKey, {
   auth: {
     storage: localStorage,
     persistSession: true,

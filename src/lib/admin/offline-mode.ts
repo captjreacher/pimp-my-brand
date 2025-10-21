@@ -1,5 +1,22 @@
-// Offline Admin Mode - for testing without Supabase connection
-export const OFFLINE_ADMIN_MODE = false; // Set to false when Supabase is working
+// Offline Admin Mode - automatically enabled when Supabase credentials are missing
+
+const flagEnabled = (value?: string) => value?.toLowerCase() === 'true';
+
+const hasSupabaseCredentials = Boolean(
+  import.meta.env.VITE_SUPABASE_URL &&
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
+
+const forceOffline = flagEnabled(import.meta.env.VITE_FORCE_OFFLINE_ADMIN);
+const disableOffline = flagEnabled(import.meta.env.VITE_DISABLE_OFFLINE_ADMIN);
+
+const shouldUseOffline = forceOffline || (
+  !disableOffline &&
+  import.meta.env.DEV &&
+  !hasSupabaseCredentials
+);
+
+export const OFFLINE_ADMIN_MODE = shouldUseOffline;
 
 export const offlineAdminUser = {
   id: 'offline-admin-123',
