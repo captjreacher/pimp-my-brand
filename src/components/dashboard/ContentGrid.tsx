@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,10 +52,32 @@ import {
 } from '@/components/ui/select';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+import { PDFExporter, ShareManager } from '@/lib/export';
+import type { BrandRider, CV as CVDocument } from '@/lib/generators/types';
+
+type BrandRow = Database['public']['Tables']['brands']['Row'] & {
+  tags?: string[] | null;
+  is_favorite?: boolean | null;
+};
+
+type CVRow = Database['public']['Tables']['cvs']['Row'] & {
+  tags?: string[] | null;
+  is_favorite?: boolean | null;
+};
+
+type UploadRow = Database['public']['Tables']['uploads']['Row'];
+
+type ContentItem = BrandRow | CVRow | UploadRow;
+
+const isUploadItem = (item: ContentItem): item is UploadRow => 'storage_path' in item;
+const isBrandItem = (item: ContentItem): item is BrandRow => 'tagline' in item;
+const isCVItem = (item: ContentItem): item is CVRow => 'summary' in item && !('storage_path' in item);
 
 interface ContentGridProps {
   type: 'brands' | 'cvs' | 'uploads';
-  items: any[];
+  items: ContentItem[];
   onRefresh: () => void;
 }
 
@@ -91,15 +113,16 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
 
   const getFilterOptions = () => {
     const options = [{ value: 'all', label: 'All Items' }];
-    
+
     if (type !== 'uploads') {
+      const structuredItems = items.filter(item => !isUploadItem(item)) as Array<BrandRow | CVRow>;
       options.push(
         { value: 'public', label: 'Public' },
         { value: 'private', label: 'Private' }
       );
-      
+
       // Add format presets
-      const formats = [...new Set(items.map(item => item.format_preset).filter(Boolean))];
+      const formats = [...new Set(structuredItems.map(item => item.format_preset).filter(Boolean))];
       formats.forEach(format => {
         options.push({ value: format, label: format.toUpperCase() });
       });
@@ -108,7 +131,280 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
     return options;
   };
 
-  const handleAction = async (action: string, item: any) => {
+  const tableName = useMemo(() => {
+    switch (type) {
+      case 'brands':
+        return 'brands';
+      case 'cvs':
+        return 'cvs';
+      default:
+        return 'uploads';
+    }
+  }, [type]);
+
+  const createHandledError = (error: unknown, fallbackMessage: string) => {
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : fallbackMessage;
+
+    console.error(fallbackMessage, error);
+    toast.error(message);
+
+    const handledError =
+      error instanceof Error ? error : new Error(message || fallbackMessage);
+    (handledError as any).handled = true;
+    return handledError;
+  };
+
+  const triggerFileDownload = (url: string, filename: string) => {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  };
+
+  const getItemTags = (item: ContentItem): string[] => {
+    if ('tags' in item && Array.isArray(item.tags)) {
+      return (item.tags as string[]) ?? [];
+    }
+    return [];
+  };
+
+  const mapBrandToDocument = (brand: Database['public']['Tables']['brands']['Row']): BrandRider => ({
+    title: brand.title || 'Untitled Brand',
+    tagline: brand.tagline || '',
+    voiceTone: brand.tone_notes ? [brand.tone_notes] : [],
+    signaturePhrases: brand.signature_phrases || [],
+    strengths: brand.strengths || [],
+    weaknesses: brand.weaknesses || [],
+    palette: (brand.color_palette as BrandRider['palette']) || [],
+    fonts: (brand.fonts as BrandRider['fonts']) || { heading: 'Arial', body: 'Arial' },
+    bio: brand.bio || '',
+    examples: (brand.examples as BrandRider['examples']) || [],
+    format: (brand.format_preset as BrandRider['format']) || 'professional',
+  });
+
+  const mapCVToDocument = (cv: Database['public']['Tables']['cvs']['Row']): CVDocument => ({
+    name: cv.title || 'Untitled CV',
+    role: 'Professional',
+    summary: cv.summary || '',
+    experience: (cv.experience as CVDocument['experience']) || [],
+    skills: cv.skills || [],
+    links: (cv.links as CVDocument['links']) || [],
+    format: (cv.format_preset as CVDocument['format']) || 'professional',
+  });
+
+  const duplicateUpload = async (item: Database['public']['Tables']['uploads']['Row']) => {
+    const originalPath = item.storage_path;
+    const fileNameParts = item.original_name.split('.');
+    const extension = fileNameParts.length > 1 ? `.${fileNameParts.pop()}` : '';
+    const baseName = fileNameParts.join('.') || 'file';
+    const newFileName = `${baseName}-copy${extension}`;
+    const newPath = `${item.user_id}/${crypto.randomUUID?.() || Date.now()}-${newFileName}`;
+
+    const { error: copyError } = await supabase.storage
+      .from('uploads')
+      .copy(originalPath, newPath);
+
+    if (copyError) {
+      throw copyError;
+    }
+
+    const { error: insertError } = await supabase
+      .from('uploads')
+      .insert({
+        user_id: item.user_id,
+        storage_path: newPath,
+        original_name: newFileName,
+        mime_type: item.mime_type,
+        size_bytes: item.size_bytes,
+        extracted_text: item.extracted_text,
+        visibility: item.visibility,
+      });
+
+    if (insertError) {
+      throw insertError;
+    }
+  };
+
+  const duplicateRecord = async (itemId: string) => {
+    if (type === 'uploads') {
+      const { data, error } = await supabase
+        .from('uploads')
+        .select('*')
+        .eq('id', itemId)
+        .single();
+
+      if (error || !data) {
+        throw error || new Error('Upload not found');
+      }
+
+      await duplicateUpload(data);
+      return;
+    }
+
+    if (type === 'brands') {
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('id', itemId)
+        .single();
+
+      if (error || !data) {
+        throw error || new Error('Brand not found');
+      }
+
+      const now = new Date().toISOString();
+      const { id, created_at, updated_at, ...rest } = data;
+      const payload: Partial<BrandRow> = {
+        ...rest,
+        title: data.title ? `${data.title} (Copy)` : 'Untitled brand Copy',
+        created_at: now,
+        updated_at: now,
+      };
+
+      const { error: insertError } = await supabase
+        .from('brands')
+        .insert(payload as Database['public']['Tables']['brands']['Insert']);
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('cvs')
+      .select('*')
+      .eq('id', itemId)
+      .single();
+
+    if (error || !data) {
+      throw error || new Error('CV not found');
+    }
+
+    const now = new Date().toISOString();
+    const { id, created_at, updated_at, ...rest } = data;
+    const payload: Partial<CVRow> = {
+      ...rest,
+      title: data.title ? `${data.title} (Copy)` : 'Untitled cv Copy',
+      created_at: now,
+      updated_at: now,
+    };
+
+    const { error: insertError } = await supabase
+      .from('cvs')
+      .insert(payload as Database['public']['Tables']['cvs']['Insert']);
+
+    if (insertError) {
+      throw insertError;
+    }
+  };
+
+  const deleteUpload = async (item: Database['public']['Tables']['uploads']['Row']) => {
+    const { error: storageError } = await supabase.storage
+      .from('uploads')
+      .remove([item.storage_path]);
+
+    if (storageError) {
+      throw storageError;
+    }
+  };
+
+  const deleteRecord = async (item: ContentItem) => {
+    if (type === 'uploads') {
+      await deleteUpload(item as UploadRow);
+    }
+
+    const { error } = await supabase
+      .from(tableName)
+      .delete()
+      .eq('id', item.id);
+
+    if (error) {
+      throw error;
+    }
+  };
+
+  const shareItem = async (itemId: string) => {
+    if (type === 'uploads') {
+      throw new Error('Sharing is not supported for uploads');
+    }
+
+    const shareResult =
+      type === 'brands'
+        ? await ShareManager.shareBrandRider(itemId)
+        : await ShareManager.shareCV(itemId);
+
+    try {
+      await navigator.clipboard.writeText(shareResult.url);
+      toast.success('Share link copied to clipboard');
+    } catch (clipboardError) {
+      console.warn('Clipboard write failed, falling back to prompt', clipboardError);
+      window.prompt?.('Share link (copy manually):', shareResult.url);
+      toast.success('Share link ready');
+    }
+  };
+
+  const downloadUpload = async (item: Database['public']['Tables']['uploads']['Row']) => {
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .download(item.storage_path);
+
+    if (error || !data) {
+      throw error || new Error('Unable to download file');
+    }
+
+    const url = URL.createObjectURL(data);
+    triggerFileDownload(url, item.original_name);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadBrand = async (itemId: string) => {
+    const { data, error } = await supabase
+      .from('brands')
+      .select('*')
+      .eq('id', itemId)
+      .single();
+
+    if (error || !data) {
+      throw error || new Error('Brand not found');
+    }
+
+    const document = mapBrandToDocument(data);
+    const { url, filename } = await PDFExporter.exportBrandRider(document, {
+      filename: `${(data.title || 'brand')}-rider.pdf`,
+    });
+
+    triggerFileDownload(url, filename);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
+
+  const downloadCV = async (itemId: string) => {
+    const { data, error } = await supabase
+      .from('cvs')
+      .select('*')
+      .eq('id', itemId)
+      .single();
+
+    if (error || !data) {
+      throw error || new Error('CV not found');
+    }
+
+    const document = mapCVToDocument(data);
+    const { url, filename } = await PDFExporter.exportCV(document, {
+      filename: `${(data.title || 'cv')}.pdf`,
+    });
+
+    triggerFileDownload(url, filename);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
+
+  const handleAction = async (action: string, item: ContentItem) => {
     switch (action) {
       case 'view':
         if (type === 'brands') {
@@ -132,39 +428,202 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
         }
         break;
       case 'duplicate':
-        // TODO: Implement duplication logic
-        toast.success(`${type.slice(0, -1)} duplicated successfully`);
-        onRefresh();
-        break;
+        try {
+          await duplicateRecord(item.id);
+          toast.success(`${type.slice(0, -1)} duplicated successfully`);
+          onRefresh();
+        } catch (error) {
+          throw createHandledError(error, `Unable to duplicate ${type.slice(0, -1)}`);
+        }
+        return;
       case 'delete':
-        // TODO: Implement deletion logic with confirmation
-        toast.success(`${type.slice(0, -1)} deleted successfully`);
-        onRefresh();
-        break;
+        try {
+          await deleteRecord(item);
+          toast.success(`${type.slice(0, -1)} deleted successfully`);
+          onRefresh();
+        } catch (error) {
+          throw createHandledError(error, `Unable to delete ${type.slice(0, -1)}`);
+        }
+        return;
       case 'share':
-        // TODO: Implement sharing logic
-        toast.success('Share link copied to clipboard');
-        break;
+        try {
+          await shareItem(item.id);
+        } catch (error) {
+          throw createHandledError(error, `Unable to share ${type.slice(0, -1)}`);
+        }
+        return;
       case 'download':
-        // TODO: Implement download logic
-        toast.success('Download started');
-        break;
+        try {
+          if (type === 'uploads') {
+            await downloadUpload(item);
+          } else if (type === 'brands') {
+            await downloadBrand(item.id);
+          } else if (type === 'cvs') {
+            await downloadCV(item.id);
+          }
+          toast.success('Download started');
+        } catch (error) {
+          throw createHandledError(error, `Unable to download ${type.slice(0, -1)}`);
+        }
+        return;
     }
   };
 
   const handleBulkAction = async (action: string, itemIds: string[]) => {
-    // TODO: Implement bulk actions
-    console.log(`Bulk ${action} for items:`, itemIds);
+    const selectedItems = items.filter(item => itemIds.includes(item.id));
+
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+    try {
+      switch (action) {
+        case 'duplicate':
+          for (const item of selectedItems) {
+            await duplicateRecord(item.id);
+          }
+          onRefresh();
+          break;
+        case 'export':
+          for (const item of selectedItems) {
+            await handleAction('download', item);
+          }
+          break;
+        case 'share':
+          if (type === 'uploads') {
+            throw new Error('Uploads cannot be shared');
+          }
+          {
+            const shareLinks: string[] = [];
+            for (const item of selectedItems) {
+              const result =
+                type === 'brands'
+                  ? await ShareManager.shareBrandRider(item.id)
+                  : await ShareManager.shareCV(item.id);
+              shareLinks.push(result.url);
+            }
+            const combinedLinks = shareLinks.join('\n');
+            try {
+              await navigator.clipboard.writeText(combinedLinks);
+              toast.success('Share links copied to clipboard');
+            } catch (clipboardError) {
+              console.warn('Failed to write share links to clipboard', clipboardError);
+              window.prompt?.('Share links (copy manually):', combinedLinks);
+              toast.success('Share links ready');
+            }
+          }
+          break;
+        case 'archive':
+          if (type === 'uploads') {
+            throw new Error('Archive is only available for generated content');
+          }
+          await supabase
+            .from(tableName)
+            .update({ visibility: 'archived' } as any)
+            .in('id', itemIds);
+          onRefresh();
+          break;
+        case 'makePublic':
+          if (type === 'uploads') {
+            throw new Error('Visibility updates are not supported for uploads');
+          }
+          await supabase
+            .from(tableName)
+            .update({ visibility: 'public' } as any)
+            .in('id', itemIds);
+          onRefresh();
+          break;
+        case 'makePrivate':
+          if (type === 'uploads') {
+            throw new Error('Visibility updates are not supported for uploads');
+          }
+          await supabase
+            .from(tableName)
+            .update({ visibility: 'private' } as any)
+            .in('id', itemIds);
+          onRefresh();
+          break;
+        case 'addTag':
+          if (type === 'uploads') {
+            throw new Error('Tags are only supported for generated content');
+          }
+          {
+            const newTag = window.prompt?.('Enter a tag to add to the selected items');
+            if (!newTag) {
+              throw new Error('Tag entry cancelled');
+            }
+
+            for (const item of selectedItems) {
+              const updatedTags = Array.from(new Set([...getItemTags(item), newTag]));
+              await supabase
+                .from(tableName)
+                .update({ tags: updatedTags } as any)
+                .eq('id', item.id);
+            }
+            onRefresh();
+          }
+          break;
+        case 'delete':
+          for (const item of selectedItems) {
+            await deleteRecord(item);
+          }
+          onRefresh();
+          break;
+        default:
+          console.warn(`Unhandled bulk action: ${action}`);
+      }
+    } catch (error) {
+      if ((error as any)?.handled) {
+        throw error;
+      }
+      throw createHandledError(error, `Failed to process ${action} action`);
+    }
   };
 
   const handleTagsUpdate = async (itemId: string, tags: string[]) => {
-    // TODO: Implement tags update
-    console.log(`Update tags for ${itemId}:`, tags);
+    if (type === 'uploads') {
+      toast.error('Tags are only available for generated content');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from(tableName)
+        .update({ tags } as any)
+        .eq('id', itemId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Tags updated successfully');
+      onRefresh();
+    } catch (error) {
+      throw createHandledError(error, 'Failed to update tags');
+    }
   };
 
   const handleFavoriteToggle = async (itemId: string, isFavorite: boolean) => {
-    // TODO: Implement favorite toggle
-    console.log(`Toggle favorite for ${itemId}:`, isFavorite);
+    if (type === 'uploads') {
+      toast.error('Favorites are only available for generated content');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from(tableName)
+        .update({ is_favorite: isFavorite } as any)
+        .eq('id', itemId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success(isFavorite ? 'Added to favorites' : 'Removed from favorites');
+      onRefresh();
+    } catch (error) {
+      throw createHandledError(error, 'Failed to update favorite status');
+    }
   };
 
   const handleSelectAll = (selected: boolean) => {
@@ -239,7 +698,7 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
           {/* Single Item Actions or Bulk Actions */}
           {selectedItems.length === 1 ? (
             <SingleItemActions
-              item={filteredItems.find(item => item.id === selectedItems[0])}
+              item={filteredItems.find(item => item.id === selectedItems[0]) ?? null}
               contentType={type}
               onAction={handleAction}
               onClearSelection={() => setSelectedItems([])}
@@ -305,7 +764,7 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Favorite {type}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {items.filter(item => item.is_favorite).map((item) => (
+              {items.filter(item => Boolean(item.is_favorite)).map((item) => (
                 <ContentCard
                   key={item.id}
                   type={type}
@@ -316,7 +775,7 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
                 />
               ))}
             </div>
-            {items.filter(item => item.is_favorite).length === 0 && (
+            {items.filter(item => Boolean(item.is_favorite)).length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 No favorite {type} yet. Star items to add them to your favorites.
               </div>
@@ -330,24 +789,24 @@ export function ContentGrid({ type, items, onRefresh }: ContentGridProps) {
 
 interface ContentCardProps {
   type: 'brands' | 'cvs' | 'uploads';
-  item: any;
+  item: ContentItem;
   isSelected?: boolean;
   onSelect?: (selected: boolean) => void;
-  onAction: (action: string, item: any) => void;
+  onAction: (action: string, item: ContentItem) => Promise<void> | void;
 }
 
 function ContentCard({ type, item, isSelected = false, onSelect, onAction }: ContentCardProps) {
   const getTitle = () => {
-    if (type === 'uploads') return item.original_name;
+    if (isUploadItem(item)) return item.original_name;
     return item.title || `Untitled ${type.slice(0, -1)}`;
   };
 
   const getSubtitle = () => {
-    if (type === 'uploads') {
+    if (isUploadItem(item)) {
       return `${item.mime_type} • ${formatFileSize(item.size_bytes)}`;
     }
-    if (type === 'brands') return item.tagline;
-    if (type === 'cvs') return item.summary;
+    if (isBrandItem(item)) return item.tagline || '';
+    if (isCVItem(item)) return item.summary || '';
     return '';
   };
 
@@ -426,12 +885,12 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
       <CardContent className="pt-0">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            {item.format_preset && (
+            {'format_preset' in item && item.format_preset && (
               <Badge variant="secondary" className="text-xs">
                 {item.format_preset.toUpperCase()}
               </Badge>
             )}
-            {item.visibility && (
+            {'visibility' in item && item.visibility && (
               <Badge variant="outline" className="text-xs">
                 {item.visibility === 'public' ? (
                   <><Globe className="w-3 h-3 mr-1" />Public</>
@@ -458,7 +917,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                onClick={() => onAction('view', item)}
+                onClick={() => {
+                  Promise.resolve(onAction('view', item)).catch(() => {});
+                }}
               >
                 <Eye className="w-4 h-4 mr-2" />
                 View
@@ -467,7 +928,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                onClick={() => onAction('edit', item)}
+                onClick={() => {
+                  Promise.resolve(onAction('edit', item)).catch(() => {});
+                }}
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
@@ -477,7 +940,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
                   variant="default"
                   size="sm"
                   className="flex-1"
-                  onClick={() => onAction('generateCV', item)}
+                  onClick={() => {
+                    Promise.resolve(onAction('generateCV', item)).catch(() => {});
+                  }}
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   CV
@@ -491,7 +956,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs"
-                onClick={() => onAction('share', item)}
+                onClick={() => {
+                  Promise.resolve(onAction('share', item)).catch(() => {});
+                }}
               >
                 <Share className="w-3 h-3 mr-1" />
                 Share
@@ -500,7 +967,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs"
-                onClick={() => onAction('duplicate', item)}
+                onClick={() => {
+                  Promise.resolve(onAction('duplicate', item)).catch(() => {});
+                }}
               >
                 <Copy className="w-3 h-3 mr-1" />
                 Copy
@@ -509,7 +978,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs"
-                onClick={() => onAction('download', item)}
+                onClick={() => {
+                  Promise.resolve(onAction('download', item)).catch(() => {});
+                }}
               >
                 <Download className="w-3 h-3 mr-1" />
                 Export
@@ -524,7 +995,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => onAction('download', item)}
+              onClick={() => {
+                Promise.resolve(onAction('download', item)).catch(() => {});
+              }}
             >
               <Download className="w-4 h-4 mr-2" />
               Download
@@ -537,9 +1010,9 @@ function ContentCard({ type, item, isSelected = false, onSelect, onAction }: Con
 }
 
 interface SingleItemActionsProps {
-  item: any;
+  item: ContentItem | null;
   contentType: 'brands' | 'cvs' | 'uploads';
-  onAction: (action: string, item: any) => void;
+  onAction: (action: string, item: ContentItem) => Promise<void> | void;
   onClearSelection: () => void;
 }
 
@@ -550,7 +1023,7 @@ function SingleItemActions({ item, contentType, onAction, onClearSelection }: Si
   if (!item) return null;
 
   const getTitle = () => {
-    if (contentType === 'uploads') return item.original_name;
+    if (isUploadItem(item)) return item.original_name;
     return item.title || `Untitled ${contentType.slice(0, -1)}`;
   };
 
@@ -615,7 +1088,9 @@ function SingleItemActions({ item, contentType, onAction, onClearSelection }: Si
         onClearSelection();
       }
     } catch (error) {
-      toast.error(`Failed to ${action} ${contentType.slice(0, -1)}. Please try again.`);
+      if (!(error as any)?.handled) {
+        toast.error(`Failed to ${action} ${contentType.slice(0, -1)}. Please try again.`);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -627,7 +1102,9 @@ function SingleItemActions({ item, contentType, onAction, onClearSelection }: Si
       await onAction('delete', item);
       onClearSelection();
     } catch (error) {
-      toast.error(`Failed to delete ${contentType.slice(0, -1)}. Please try again.`);
+      if (!(error as any)?.handled) {
+        toast.error(`Failed to delete ${contentType.slice(0, -1)}. Please try again.`);
+      }
     } finally {
       setIsProcessing(false);
       setShowDeleteDialog(false);
@@ -647,18 +1124,18 @@ function SingleItemActions({ item, contentType, onAction, onClearSelection }: Si
             <div>
               <h3 className="font-medium text-sm">{getTitle()}</h3>
               <p className="text-xs text-muted-foreground line-clamp-1">
-                {contentType === 'brands' && item.tagline}
-                {contentType === 'cvs' && item.summary}
-                {contentType === 'uploads' && `${item.mime_type} • ${formatFileSize(item.size_bytes)}`}
+                {isBrandItem(item) && item.tagline}
+                {isCVItem(item) && item.summary}
+                {isUploadItem(item) && `${item.mime_type} • ${formatFileSize(item.size_bytes)}`}
               </p>
               {contentType === 'brands' && (
                 <div className="flex items-center gap-2 mt-1">
-                  {item.format_preset && (
+                  {isBrandItem(item) && item.format_preset && (
                     <Badge variant="outline" className="text-xs px-1 py-0">
                       {item.format_preset.toUpperCase()}
                     </Badge>
                   )}
-                  {item.visibility && (
+                  {'visibility' in item && item.visibility && (
                     <Badge variant="secondary" className="text-xs px-1 py-0">
                       {item.visibility === 'public' ? 'Public' : 'Private'}
                     </Badge>
