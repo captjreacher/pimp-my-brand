@@ -67,7 +67,7 @@ class ModerationService {
         content_id: brand.id,
         user_id: brand.user_id,
         status: this.analyzeContentStatus(brand.title, brand.bio),
-        risk_score: this.calculateRiskScore(brand.title, brand.bio),
+        risk_score: this.calculateLocalRiskScore(brand.title, brand.bio),
         auto_flagged: this.shouldAutoFlag(brand.title, brand.bio),
         created_at: brand.created_at,
         content_preview: {
@@ -90,7 +90,7 @@ class ModerationService {
     return 'approved';
   }
 
-  private calculateRiskScore(title?: string, bio?: string): number {
+  private calculateLocalRiskScore(title?: string, bio?: string): number {
     let score = 0;
     if (!title || title.trim().length === 0) score += 50;
     if (title && title.length < 2) score += 30;
@@ -101,7 +101,7 @@ class ModerationService {
   }
 
   private shouldAutoFlag(title?: string, bio?: string): boolean {
-    return this.calculateRiskScore(title, bio) > 50;
+    return this.calculateLocalRiskScore(title, bio) > 50;
   }
 
   /**
