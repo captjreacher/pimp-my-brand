@@ -1,5 +1,6 @@
 // Service Worker for caching static assets
-const CACHE_NAME = 'pbg-cache-v1';
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `pbg-cache-${CACHE_VERSION}`;
 const STATIC_CACHE_URLS = [
   '/',
   '/favicon.ico',
