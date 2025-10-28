@@ -10,12 +10,12 @@ import SimpleWorkingAdmin from '@/pages/admin/SimpleWorkingAdmin';
 import BasicTest from '@/pages/admin/BasicTest';
 import UltraBasicTest from '@/pages/admin/UltraBasicTest';
 import { UserManagementPage } from '@/pages/admin/UserManagementPage';
-import { AnalyticsPage } from '@/pages/admin/AnalyticsPage';
+import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import { ContentModerationPage } from '@/pages/admin/ContentModerationPage';
 import { SystemConfigPage } from '@/pages/admin/SystemConfigPage';
 import { SubscriptionManagementPage } from '@/pages/admin/SubscriptionManagementPage';
-import { SecurityPage } from '@/pages/admin/SecurityPage';
-import { CommunicationPage } from '@/pages/admin/CommunicationPage';
+import SecurityPage from '@/pages/admin/SecurityPage';
+import CommunicationPage from '@/pages/admin/CommunicationPage';
 import { AIContentManagementPage } from '@/pages/admin/AIContentManagementPage';
 
 /**
