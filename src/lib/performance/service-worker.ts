@@ -24,6 +24,16 @@ export class ServiceWorkerManager {
 
       console.log('Service Worker registered successfully');
 
+      // Automatically reload the page when a new service worker takes control
+      let isRefreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (isRefreshing) {
+          return;
+        }
+        isRefreshing = true;
+        window.location.reload();
+      });
+
       // Handle updates
       this.registration.addEventListener('updatefound', () => {
         const newWorker = this.registration?.installing;
@@ -31,7 +41,7 @@ export class ServiceWorkerManager {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // New content is available, notify user
-              this.notifyUpdate();
+              void this.notifyUpdate();
             }
           });
         }
@@ -65,14 +75,21 @@ export class ServiceWorkerManager {
   }
 
   // Notify user about updates
-  private notifyUpdate(): void {
+  private async notifyUpdate(): Promise<void> {
     // You can integrate this with your notification system
-    console.log('New version available! Please refresh the page.');
-    
-    // Optional: Show a toast notification
+    console.log('New version available! Refreshing with the latest assets.');
+
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('sw-update-available'));
     }
+
+    try {
+      await this.clearCaches();
+    } catch (error) {
+      console.error('Failed to clear caches before activating new service worker:', error);
+    }
+
+    this.skipWaiting();
   }
 
   // Clear all caches
