@@ -27,6 +27,7 @@ const CVView = lazy(() => import("./pages/CVView"));
 const GenerateCV = lazy(() => import("./pages/GenerateCV"));
 const Uploads = lazy(() => import("./pages/Uploads"));
 const Pricing = lazy(() => import("./pages/Pricing"));
+const HomeComingSoon = lazy(() => import("./pages/HomeComingSoon"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Profile = lazy(() => import("./pages/Profile"));
 const PlayerProfile = lazy(() => import("./pages/PlayerProfile"));
@@ -69,6 +70,7 @@ const App = () => {
             <Route path="/template/:format" element={<TemplatePreview />} />
             <Route path="/share/:token" element={<SharedContent />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/home-coming-soon" element={<HomeComingSoon />} />
             <Route path="/create" element={<CreateBrand />} />
             <Route path="/brand/:id" element={<BrandView />} />
             <Route path="/brand/:id/edit" element={<BrandEditor />} />
