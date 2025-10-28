@@ -1,48 +1,39 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Zap, FileText, Share2, Users, Shield } from "lucide-react";
+import logo from "@/images/logo.png";
 
 const Landing = () => {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
+      {/* Launching Soon Section */}
       <section className="relative overflow-hidden">
         <div className="gradient-hero absolute inset-0" />
-        
+
         <div className="relative container mx-auto px-6 py-24 lg:py-32">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface/60 backdrop-blur-sm border border-border mb-8">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">AI-Powered Personal Branding</span>
+            <div className="flex flex-col items-center gap-6 mb-10">
+              <img src={logo} alt="Maximised AI logo" className="h-16 w-auto" />
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface/60 backdrop-blur-sm border border-border">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm text-muted-foreground">Launching Soon</span>
+              </div>
             </div>
-            
+
             <h1 className="font-heading text-5xl lg:text-7xl font-bold mb-6 leading-tight">
-              Your Brand,
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary"> Maximised</span>
+              Your Brand Experience Is Nearly Here
             </h1>
-            
+
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Generate professional brand identities and CVs instantly. Choose from UFC, Military, Influencer, and more presentation formats.
+              We&apos;re putting the final touches on Maximised AI—an AI-powered platform for instantly creating professional brand identities and compelling CVs. Check back soon to be among the first to craft your story.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl shadow-glow"
-              >
-                <Link to="/auth">Generate Your Brand</Link>
-              </Button>
-              
-              <Button 
-                asChild 
-                variant="outline" 
-                size="lg"
-                className="border-border hover:bg-surface/80 font-semibold px-8 py-6 text-lg rounded-2xl"
-              >
-                <Link to="/gallery">Browse Gallery</Link>
-              </Button>
-            </div>
+
+            <Button
+              size="lg"
+              disabled
+              className="bg-primary/80 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl shadow-glow cursor-not-allowed"
+            >
+              Stay Tuned
+            </Button>
           </div>
         </div>
       </section>
@@ -101,16 +92,12 @@ const Landing = () => {
       <section className="py-24">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center gradient-card border border-border rounded-3xl p-12 shadow-soft">
-            <h2 className="font-heading text-4xl font-bold mb-6">Ready to Build Your Brand?</h2>
+            <h2 className="font-heading text-4xl font-bold mb-6">We&apos;re Almost Ready</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join professionals, athletes, creators, and leaders who trust our platform to craft compelling brand narratives.
+              Our team is finishing the experience that will help professionals, athletes, creators, and leaders craft compelling brand narratives in minutes.
             </p>
-            <Button 
-              asChild 
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl shadow-glow"
-            >
-              <Link to="/auth">Get Started Free</Link>
+            <Button size="lg" disabled className="bg-primary/80 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl shadow-glow cursor-not-allowed">
+              Coming Soon
             </Button>
           </div>
         </div>
@@ -124,9 +111,9 @@ const Landing = () => {
               Powered by <span className="text-primary font-semibold">Maximised AI</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition">Privacy</a>
-              <a href="#" className="hover:text-foreground transition">Terms</a>
-              <a href="#" className="hover:text-foreground transition">Contact</a>
+              <span className="opacity-70">Privacy</span>
+              <span className="opacity-70">Terms</span>
+              <span className="opacity-70">Contact</span>
             </div>
           </div>
         </div>
