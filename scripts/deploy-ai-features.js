@@ -366,29 +366,34 @@ class AIFeaturesDeployer {
 ${colors.bold}To complete the deployment:${colors.reset}
 
 1. ${colors.blue}Deploy to your hosting platform:${colors.reset}
-   
-   ${colors.bold}Vercel:${colors.reset}
-   vercel --prod
-   
-   ${colors.bold}Netlify:${colors.reset}
-   netlify deploy --prod --dir=dist
-   
-   ${colors.bold}Other platforms:${colors.reset}
-   Upload the 'dist' directory to your web server
 
-2. ${colors.blue}Set environment variables on your hosting platform:${colors.reset}
+   ${colors.bold}Spaceship (funkmybrand.com production):${colors.reset}
+   bash scripts/deploy-to-spaceship.sh
+   # Upload the generated zip from /deployments through the Spaceship file manager
+   # Extract it into public_html so index.html and assets/ live at the root
+
+   ${colors.bold}Manual upload:${colors.reset}
+   npm run build && cp .htaccess dist/
+   # Upload the dist/ contents into your Spaceship public directory
+
+2. ${colors.blue}Verify DNS is pointing to Spaceship:${colors.reset}
+   - Update the funkmybrand.com A record to the Spaceship IP
+   - Update any www CNAME to target funkmybrand.com
+   - Remove legacy Vercel records so the site no longer serves from Vercel
+
+3. ${colors.blue}Set environment variables on Supabase/hosting:${colors.reset}
    - VITE_SUPABASE_URL
    - VITE_SUPABASE_ANON_KEY
    - VITE_OPENAI_API_KEY
    - VITE_ELEVENLABS_API_KEY (optional)
 
-3. ${colors.blue}Test the deployment:${colors.reset}
+4. ${colors.blue}Test the deployment:${colors.reset}
    - Visit your deployed application
    - Test AI content generation features
    - Check admin panel AI management section
    - Verify content moderation is working
 
-4. ${colors.blue}Monitor the deployment:${colors.reset}
+5. ${colors.blue}Monitor the deployment:${colors.reset}
    - Check Supabase dashboard for database activity
    - Monitor AI API usage and costs
    - Review performance metrics in admin panel
