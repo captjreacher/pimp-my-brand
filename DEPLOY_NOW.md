@@ -11,44 +11,40 @@ Your AI content generation features are ready to deploy! Here's the quickest pat
 
 ## 🎯 Quick Deployment Options
 
-### Option 1: Vercel (Recommended - Fastest)
+### Option 1: Spaceship Hosting (Production Live Site)
 
 ```bash
-# 1. Install Vercel CLI
-npm i -g vercel
-
-# 2. Deploy
-vercel --prod
-
-# 3. Set environment variables in Vercel dashboard:
-# - VITE_SUPABASE_URL
-# - VITE_SUPABASE_ANON_KEY  
-# - VITE_OPENAI_API_KEY (required for AI features)
-# - VITE_ELEVENLABS_API_KEY (optional)
-```
-
-### Option 2: Netlify
-
-```bash
-# 1. Install Netlify CLI
-npm i -g netlify-cli
-
-# 2. Build and deploy
+# 1. Install dependencies and build
+npm install
 npm run build
-netlify deploy --prod --dir=dist
 
-# 3. Set environment variables in Netlify dashboard
+# 2. Generate an upload-ready package (includes .htaccess)
+bash scripts/deploy-to-spaceship.sh
+
+# 3. Upload the generated zip from /deployments to Spaceship's file manager
+#    (public_html for funkmybrand.com) and extract it into the root
 ```
 
-### Option 3: Manual Upload
+Once uploaded, confirm the domain is pointing to Spaceship:
+
+- Update the `funkmybrand.com` **A record** to the Spaceship IP (remove any Vercel A or CNAME records).
+- If you used a `www` CNAME for Vercel, point it to `funkmybrand.com` on Spaceship instead.
+- After DNS propagates, visit <https://funkmybrand.com> and verify the new homepage loads from Spaceship.
+
+### Option 2: Manual Upload (without helper script)
 
 ```bash
 # 1. Build the application
+npm install
 npm run build
 
-# 2. Upload the 'dist' folder to your web server
-# The build is in the 'dist' directory
+# 2. Copy the .htaccess file into dist (required for SPA routing)
+cp .htaccess dist/
+
+# 3. Upload the contents of dist/ to your Spaceship public folder
 ```
+
+> ❗️ Vercel is no longer part of the production stack. Do not deploy new builds there or the live domain will continue to serve the legacy site.
 
 ## 🗄️ Database Setup
 
@@ -153,8 +149,8 @@ Your deployment is successful when:
 
 ## 🚀 Ready to Deploy?
 
-1. **Choose your deployment method** (Vercel recommended)
-2. **Set environment variables** (especially OpenAI API key)
+1. **Package and upload to Spaceship** (use the helper script or manual steps above)
+2. **Confirm environment variables** (especially OpenAI API key)
 3. **Apply database migrations** (`supabase db push`)
 4. **Test the deployment**
 5. **Monitor and enjoy your AI-powered platform!**

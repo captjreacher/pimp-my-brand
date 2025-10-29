@@ -188,41 +188,37 @@ npm run build
 
 #### Deploy to Hosting Platform
 
-##### Vercel Deployment
+##### Spaceship Hosting Deployment (Production)
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Build and validate
+npm install
+npm run test
+npm run build
 
-# Deploy
-vercel --prod
+# Package with helper script (includes .htaccess)
+bash scripts/deploy-to-spaceship.sh
 
-# Set environment variables
-vercel env add VITE_SUPABASE_URL
-vercel env add VITE_SUPABASE_ANON_KEY
-vercel env add VITE_APP_URL
+# Upload the generated zip in /deployments to Spaceship File Manager
+# Extract it into public_html so index.html and assets/ sit at the root
 ```
 
-##### Netlify Deployment
+After extracting the package:
+
+- Verify `.htaccess` is in the root to keep React routing working.
+- Remove any legacy `dist/` subfolder so the new assets are served directly from the root.
+- Point the `funkmybrand.com` **A record** (and `www` CNAME if used) to your Spaceship hosting, removing Vercel DNS entries.
+- Once DNS propagates, confirm the homepage resolves from Spaceship instead of Vercel.
+
+##### Manual Upload (without helper script)
 ```bash
-# Install Netlify CLI
-npm i -g netlify-cli
+# Build
+npm install
+npm run build
 
-# Deploy
-netlify deploy --prod --dir=dist
+# Include .htaccess for SPA routing
+cp .htaccess dist/
 
-# Set environment variables
-netlify env:set VITE_SUPABASE_URL your-url
-netlify env:set VITE_SUPABASE_ANON_KEY your-key
-```
-
-##### Custom Server Deployment
-```bash
-# Copy build files to server
-scp -r dist/* user@server:/var/www/html/
-
-# Configure web server (nginx/apache)
-# Ensure proper HTTPS configuration
-# Set up proper cache headers
+# Upload contents of dist/ to your Spaceship public directory
 ```
 
 ### 4. Post-Deployment Verification
@@ -314,14 +310,10 @@ if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
 
 ### 1. Frontend Rollback
 ```bash
-# Vercel
-vercel rollback
-
-# Netlify
-netlify rollback
-
-# Custom server
-# Restore previous build from backup
+# Spaceship hosting
+# 1. Re-upload the previous zip package from /deployments
+# 2. Extract it to overwrite the current public_html contents
+# 3. Clear CDN or browser cache if changes aren't visible
 ```
 
 ### 2. Database Rollback
