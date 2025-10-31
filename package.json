@@ -15,7 +15,6 @@
     "deploy:check": "npm run test:run && npm run lint && npm run validate:deployment && npm run build",
     "deploy:spaceship": "powershell -ExecutionPolicy Bypass -File scripts/deploy-to-spaceship.ps1",
     "deploy:spaceship:skip-tests": "powershell -ExecutionPolicy Bypass -File scripts/deploy-to-spaceship.ps1 -SkipTests",
-    "migrate:from-vercel": "node scripts/migrate-from-vercel.js",
     "setup:openai": "echo 'OpenAI setup complete! Check OPENAI_SETUP.md for next steps'"
   },
   "dependencies": {

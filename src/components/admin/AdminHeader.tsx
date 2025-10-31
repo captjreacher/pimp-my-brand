@@ -284,7 +284,7 @@ export function AdminHeader() {
             
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/admin/notifications" className="w-full text-center">
+              <Link to="/admin/communication" className="w-full text-center">
                 View all notifications
               </Link>
             </DropdownMenuItem>
@@ -312,13 +312,13 @@ export function AdminHeader() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/admin/profile">
+              <Link to="/profile">
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/admin/settings">
+              <Link to="/admin/config">
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Link>
