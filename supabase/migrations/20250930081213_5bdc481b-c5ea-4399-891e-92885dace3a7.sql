@@ -1,5 +1,14 @@
--- Create enum for app roles
-CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
+-- Create enum for app roles (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t
+    JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'app_role' AND n.nspname = 'public'
+  ) THEN
+    CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
+  END IF;
+END$$;
 
 -- Create profiles table
 CREATE TABLE public.profiles (
