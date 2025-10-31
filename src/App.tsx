@@ -60,7 +60,7 @@ const App = () => {
         <BrowserRouter>
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<HomeComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -70,7 +70,6 @@ const App = () => {
             <Route path="/template/:format" element={<TemplatePreview />} />
             <Route path="/share/:token" element={<SharedContent />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/home-coming-soon" element={<HomeComingSoon />} />
             <Route path="/create" element={<CreateBrand />} />
             <Route path="/brand/:id" element={<BrandView />} />
             <Route path="/brand/:id/edit" element={<BrandEditor />} />
