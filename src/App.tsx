@@ -27,7 +27,7 @@ const CVView = lazy(() => import("./pages/CVView"));
 const GenerateCV = lazy(() => import("./pages/GenerateCV"));
 const Uploads = lazy(() => import("./pages/Uploads"));
 const Pricing = lazy(() => import("./pages/Pricing"));
-const HomeComingSoon = lazy(() => import("./pages/HomeComingSoon"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Profile = lazy(() => import("./pages/Profile"));
 const PlayerProfile = lazy(() => import("./pages/PlayerProfile"));
@@ -60,7 +60,7 @@ const App = () => {
         <BrowserRouter>
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
-            <Route path="/" element={<HomeComingSoon />} />
+            <Route path="/" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/dashboard" element={<Dashboard />} />
