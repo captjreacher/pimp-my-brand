@@ -23,3 +23,4 @@ with check (true);
 -- Do not expose rows by default (no SELECT policy)
 -- Admins can read via service role outside RLS.
 
+
