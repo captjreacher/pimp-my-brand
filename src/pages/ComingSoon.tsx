@@ -13,6 +13,33 @@ const ComingSoon = () => {
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
+  React.useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const existingScript = document.getElementById("mailerlite-universal-script");
+    if (existingScript) {
+      type MailerLiteFunction = (...args: unknown[]) => void;
+      const { ml } = window as typeof window & { ml?: MailerLiteFunction };
+      if (typeof ml === "function") {
+        ml("account", "1849787");
+      }
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "mailerlite-universal-script";
+    script.innerHTML = `
+      (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+      .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+      n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+      (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+      ml('account', '1849787');
+    `;
+    document.body.appendChild(script);
+  }, []);
+
   const joinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
