@@ -118,6 +118,20 @@ npm run preview
 
 ## Deployment Steps
 
+### 0. GitHub Pages Branch Deployment
+
+Automated builds from `main` are published to a dedicated `gh-pages` branch via the
+`Deploy to GitHub Pages` GitHub Actions workflow. After merging changes into `main`:
+
+- The workflow runs `npm ci` and `npm run build` to produce the static site assets in `dist/`.
+- The packaged site is uploaded as an artifact and deployed to the `gh-pages` branch using
+  GitHub Pages infrastructure.
+- In the repository settings (`Settings → Pages`), choose **GitHub Actions** as the deployment
+  source so the workflow controls the published content.
+
+Once the workflow finishes successfully, the rebuilt site is available from the `gh-pages`
+branch without serving files directly from `main`.
+
 ### 1. Pre-Deployment Validation
 
 Run the deployment validation script:
