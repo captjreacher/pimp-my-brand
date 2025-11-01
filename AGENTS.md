@@ -18,7 +18,7 @@ This will start the app on a local server, typically at `http://localhost:5173`.
 
 ## Previewing the Production Build
 
-To preview the production build locally, follow these steps:
+To preview the production build locally, follow these steps.:
 
 1.  Build the app for production:
     ```bash
