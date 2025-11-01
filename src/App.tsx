@@ -13,7 +13,6 @@ import { useWebVitals } from "./hooks/use-performance";
 import { AdminProvider } from "./contexts/AdminContext";
 
 // Lazy load pages for code splitting
-const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
