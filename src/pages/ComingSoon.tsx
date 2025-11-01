@@ -2,16 +2,9 @@ import React from "react";
 import logo from "@/images/logo.png";
 import { Sparkles, Zap, FileText, Share2, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const ComingSoon = () => {
-  const { toast } = useToast();
-  const [email, setEmail] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
+  const scriptContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     if (typeof window === "undefined") {
@@ -19,6 +12,8 @@ const ComingSoon = () => {
     }
 
     const existingScript = document.getElementById("mailerlite-universal-script");
+    const container = scriptContainerRef.current;
+
     if (existingScript) {
       type MailerLiteFunction = (...args: unknown[]) => void;
       const { ml } = window as typeof window & { ml?: MailerLiteFunction };
@@ -28,38 +23,26 @@ const ComingSoon = () => {
       return;
     }
 
+    if (!container) {
+      return;
+    }
+
+    const commentStart = document.createComment(" MailerLite Universal ");
+    const commentEnd = document.createComment(" End MailerLite Universal ");
     const script = document.createElement("script");
     script.id = "mailerlite-universal-script";
     script.innerHTML = `
-      (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-      .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-      n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-      (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-      ml('account', '1849787');
+    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+    ml('account', '1849787');
     `;
-    document.body.appendChild(script);
-  }, []);
 
-  const joinWaitlist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast({ title: "Enter a valid email", description: "We use it to notify you at launch." });
-      return;
-    }
-    setLoading(true);
-    try {
-      const { error } = await supabase.from("waitlist").insert({ email, name });
-      if (error) throw error;
-      toast({ title: "You're on the list!", description: "We’ll email you when we launch." });
-      setEmail("");
-      setName("");
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Couldn’t add you right now", description: "Please try again in a moment." });
-    } finally {
-      setLoading(false);
-    }
-  };
+    container.appendChild(commentStart);
+    container.appendChild(script);
+    container.appendChild(commentEnd);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,21 +68,7 @@ const ComingSoon = () => {
             </p>
 
             {/* Waitlist form */}
-            <form onSubmit={joinWaitlist} className="mx-auto max-w-xl grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
-              <div className="md:col-span-1">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="you@domain.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="md:col-span-3 flex justify-center">
-                <Button size="lg" className="bg-primary text-primary-foreground px-8 py-6 rounded-2xl" disabled={loading}>
-                  {loading ? "Joining…" : "Join the waitlist"}
-                </Button>
-              </div>
-            </form>
+            <div className="mx-auto max-w-xl" ref={scriptContainerRef} />
           </div>
         </div>
       </section>
