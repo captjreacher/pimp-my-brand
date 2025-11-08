@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createOptimizedQueryClient } from "./lib/cache/query-cache";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { LoadingSkeleton } from "./components/ui/loading-skeleton";
 import { preloadCriticalResources } from "./lib/performance/preloader";
@@ -59,7 +59,8 @@ const App = () => {
         <BrowserRouter>
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
-            <Route path="/" element={<ComingSoon />} />
+            <Route path="/" element={<Navigate to="/coming-soon" replace />} />
+            <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/dashboard" element={<Dashboard />} />
