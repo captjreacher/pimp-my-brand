@@ -78,10 +78,7 @@ self.addEventListener('fetch', (event) => {
             return fetchResponse;
           })
           .catch(() => {
-            // Return offline fallback for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/');
-            }
+            // No offline fallback for now to avoid redirect loops
           });
       })
   );
