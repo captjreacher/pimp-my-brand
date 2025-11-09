@@ -24,6 +24,22 @@
       ml('account', '1849787');
     </script>
     <!-- End MailerLite Universal -->
+
+    <!-- Lightweight redirect to the Coming Soon experience so users avoid a blank initial paint -->
+    <script>
+      (function () {
+        try {
+          var path = window.location.pathname;
+          var search = window.location.search || "";
+          var hash = window.location.hash || "";
+          if (path === "/" || path === "/index.html") {
+            window.location.replace("/coming-soon" + search + hash);
+          }
+        } catch (error) {
+          console.error("Static redirect failed", error);
+        }
+      })();
+    </script>
   </head>
 
   <body>
