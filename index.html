@@ -41,7 +41,7 @@
           if (shouldRedirect) {
             var search = window.location.search || "";
             var hash = window.location.hash || "";
-            window.location.replace("/coming-home/" + search + hash);
+            window.location.replace("/coming-home" + search + hash);
           }
         } catch (error) {
           console.error("Homepage redirect failed", error);
