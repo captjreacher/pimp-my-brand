@@ -59,7 +59,8 @@ const App = () => {
         <BrowserRouter>
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
-            <Route path="/" element={<Navigate to="/coming-soon" replace />} />
+            <Route path="/" element={<Navigate to="/coming-home" replace />} />
+            <Route path="/coming-home" element={<ComingSoon />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
