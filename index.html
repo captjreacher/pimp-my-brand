@@ -19,11 +19,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- MailerLite Universal -->
     <script>
-      (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);},l=d.createElement(e),l.async=1,l.src=u,n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-      (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+      (function(w,d,e,u,f,l,n){
+        w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);};
+        l=d.createElement(e);
+        l.async=1;
+        l.src=u;
+        l.onload=function(){l.setAttribute('data-loaded','true');};
+        n=d.getElementsByTagName(e)[0];
+        n.parentNode.insertBefore(l,n);
+      })(window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
       ml('account', '1849787');
     </script>
     <!-- End MailerLite Universal -->
+
+    <script>
+      (function () {
+        try {
+          var host = window.location.hostname;
+          var path = window.location.pathname;
+          var shouldRedirect = (host === "funkmybrand.com" || host === "www.funkmybrand.com") && (path === "/" || path === "/index.html");
+          if (shouldRedirect) {
+            var search = window.location.search || "";
+            var hash = window.location.hash || "";
+            window.location.replace("/coming-home" + search + hash);
+          }
+        } catch (error) {
+          console.error("Homepage redirect failed", error);
+        }
+      })();
+    </script>
 
     <!-- Lightweight redirect to the Coming Soon experience so users avoid a blank initial paint -->
     <!--

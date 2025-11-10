@@ -2,53 +2,92 @@ import React from "react";
 import logo from "@/images/logo.png";
 import { Sparkles, Zap, FileText, Share2, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
+declare global {
+  interface Window {
+    ml?: (...args: unknown[]) => void;
+    ml_q?: unknown[][];
+    __mailerliteAccountInitialized?: boolean;
+  }
+}
+
+const MAILERLITE_ACCOUNT_ID = "1849787";
+const MAILERLITE_FORM_ID = "169884978531796507";
+const MAILERLITE_FORM_SLUG = "DRbREV";
 
 const ComingSoon = () => {
-  const [isFormLoaded, setIsFormLoaded] = React.useState(false);
-  const formContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isMailerLiteReady, setIsMailerLiteReady] = React.useState(false);
 
   React.useEffect(() => {
-    const container = formContainerRef.current;
-    if (container) {
-      initializeMailerLiteForm(container);
+    const ensureMailerLiteStub = () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      if (!window.ml) {
+        const stub = function (...args: unknown[]) {
+          const queue = window.ml_q || (window.ml_q = []);
+          queue.push(args);
+        };
+        window.ml = stub;
+      }
+    };
+
+    ensureMailerLiteStub();
+
+    const initializeMailerLite = () => {
+      try {
+        if (!window.__mailerliteAccountInitialized) {
+          window.ml?.("account", MAILERLITE_ACCOUNT_ID);
+          window.__mailerliteAccountInitialized = true;
+        }
+        window.ml?.("forms", MAILERLITE_FORM_ID, MAILERLITE_FORM_SLUG);
+        setIsMailerLiteReady(true);
+      } catch (error) {
+        console.error("Failed to initialize MailerLite", error);
+      }
+    };
+
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      "script[src^=\"https://assets.mailerlite.com/js/universal\"]"
+    );
+
+    if (existingScript && existingScript.dataset.loaded === "true") {
+      initializeMailerLite();
+      return;
+    }
+
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.src = "https://assets.mailerlite.com/js/universal.js";
+      script.async = true;
+      script.onload = () => {
+        script.dataset.loaded = "true";
+        initializeMailerLite();
+      };
+      script.onerror = () => {
+        console.error("Failed to load MailerLite universal script");
+      };
+      document.head.appendChild(script);
+    } else {
+      if (existingScript.dataset.loaded === "true") {
+        initializeMailerLite();
+      } else {
+        existingScript.addEventListener("load", () => {
+          existingScript.dataset.loaded = "true";
+          initializeMailerLite();
+        });
+      }
     }
   }, []);
 
-  const initializeMailerLiteForm = (container: HTMLDivElement) => {
-    // Clear any existing content
-    container.innerHTML = '';
-
-    // Create a simple HTML form that posts to MailerLite
-    const form = document.createElement("form");
-    form.action = "https://assets.mailerlite.com/jsonp/1849787/forms/YOUR_FORM_ID/subscribe"; // Replace YOUR_FORM_ID
-    form.method = "post";
-    form.className = "space-y-4";
-
-    form.innerHTML = `
-      <div>
-        <input
-          type="email"
-          name="fields[email]"
-          placeholder="Enter your email"
-          required
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-        />
-      </div>
-      <button
-        type="submit"
-        class="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
-      >
-        Join Waitlist
-      </button>
-      <p class="text-xs text-muted-foreground text-center">
-        We respect your privacy. Unsubscribe at any time.
-      </p>
-    `;
-
-    container.appendChild(form);
-    setIsFormLoaded(true);
-  };
+  const handleJoinWaitlist = React.useCallback(() => {
+    try {
+      window.ml?.("show", MAILERLITE_FORM_SLUG);
+    } catch (error) {
+      console.error("Failed to open MailerLite popup", error);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background" style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}>
@@ -75,25 +114,17 @@ const ComingSoon = () => {
 
             {/* Waitlist form */}
             <div className="mx-auto max-w-xl">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl"
-                  >
-                    Join Waitlist
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold mb-2">Join Our Waitlist</h3>
-                    <p className="text-muted-foreground">Get early access to Funk My Brand</p>
-                  </div>
-                  <div ref={formContainerRef} className="min-h-[200px] flex items-center justify-center">
-                    {!isFormLoaded && <div className="text-muted-foreground">Loading form...</div>}
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button
+                size="lg"
+                onClick={handleJoinWaitlist}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl"
+                disabled={!isMailerLiteReady}
+              >
+                {isMailerLiteReady ? "Join Waitlist" : "Preparing Waitlist"}
+              </Button>
+              <p className="mt-4 text-sm text-muted-foreground">
+                The waitlist opens in a MailerLite pop-up. Please make sure pop-up blockers are disabled for this site.
+              </p>
             </div>
           </div>
         </div>

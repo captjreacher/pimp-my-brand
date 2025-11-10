@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Funk My Brand | Coming Home</title>
+    <meta
+      name="description"
+      content="Funk My Brand is launching soon. Join the waitlist to get early access to the AI-powered studio for instant brand identities."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --background: #070707;
+        --surface: rgba(21, 21, 21, 0.8);
+        --card: rgba(12, 12, 12, 0.85);
+        --border: rgba(255, 255, 255, 0.08);
+        --muted: rgba(214, 214, 214, 0.72);
+        --primary: #d946ef;
+        --primary-foreground: #fff9fe;
+        --accent: #38bdf8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, rgba(217, 70, 239, 0.18), transparent 45%),
+          radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.18), transparent 50%),
+          var(--background);
+        color: #f8fafc;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header,
+      main,
+      footer {
+        width: 100%;
+      }
+
+      .container {
+        width: min(1120px, 92vw);
+        margin: 0 auto;
+      }
+
+      .hero {
+        position: relative;
+        padding: 6rem 0 4rem;
+        text-align: center;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 15%, rgba(217, 70, 239, 0.2), transparent 65%);
+        filter: blur(60px);
+        opacity: 0.9;
+        z-index: -1;
+      }
+
+      .logo {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 40px rgba(217, 70, 239, 0.4);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+      }
+
+      .hero h1 {
+        font-family: "Poppins", "Inter", sans-serif;
+        font-size: clamp(2.4rem, 7vw, 3.6rem);
+        margin: 0 0 1.2rem;
+      }
+
+      .hero p {
+        max-width: 680px;
+        margin: 0.75rem auto 2.5rem;
+        color: var(--muted);
+        font-size: 1.1rem;
+        line-height: 1.7;
+      }
+
+      .waitlist-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 999px;
+        padding: 1rem 2.5rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--primary-foreground);
+        background: linear-gradient(135deg, var(--primary), #7c3aed);
+        cursor: pointer;
+        box-shadow: 0 12px 32px rgba(124, 58, 237, 0.32);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .waitlist-button[disabled] {
+        cursor: not-allowed;
+        opacity: 0.6;
+        box-shadow: none;
+      }
+
+      .waitlist-button:not([disabled]):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 40px rgba(217, 70, 239, 0.35);
+      }
+
+      .waitlist-note {
+        margin-top: 1rem;
+        color: rgba(226, 232, 240, 0.7);
+        font-size: 0.9rem;
+      }
+
+      .features {
+        padding: 4rem 0;
+      }
+
+      .features h2 {
+        font-family: "Poppins", "Inter", sans-serif;
+        font-size: clamp(2rem, 5vw, 2.6rem);
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .features p {
+        color: var(--muted);
+        text-align: center;
+        margin: 0 auto 2.5rem;
+        max-width: 620px;
+      }
+
+      .feature-grid {
+        display: grid;
+        gap: 1.6rem;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      .feature-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        padding: 1.75rem;
+        box-shadow: 0 25px 60px rgba(12, 12, 12, 0.55);
+        transition: border-color 0.2s ease, transform 0.2s ease;
+      }
+
+      .feature-card:hover {
+        border-color: rgba(217, 70, 239, 0.4);
+        transform: translateY(-4px);
+      }
+
+      .feature-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 0.9rem;
+        background: rgba(217, 70, 239, 0.1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+        font-size: 1.4rem;
+        color: var(--primary);
+      }
+
+      .feature-card h3 {
+        margin: 0 0 0.75rem;
+        font-size: 1.15rem;
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: rgba(226, 232, 240, 0.72);
+        line-height: 1.6;
+      }
+
+      .cta {
+        padding: 4rem 0 5rem;
+      }
+
+      .cta-card {
+        position: relative;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(217, 70, 239, 0.12), rgba(124, 58, 237, 0.12));
+        border: 1px solid rgba(217, 70, 239, 0.3);
+        border-radius: 1.8rem;
+        padding: 3rem 2rem;
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+      }
+
+      .cta-card::before {
+        content: "";
+        position: absolute;
+        inset: -40% 10% 50% 10%;
+        background: radial-gradient(circle, rgba(217, 70, 239, 0.35), transparent 70%);
+        opacity: 0.4;
+        z-index: -1;
+      }
+
+      .cta-card h2 {
+        font-family: "Poppins", "Inter", sans-serif;
+        font-size: clamp(2rem, 5vw, 2.8rem);
+        margin-bottom: 1rem;
+      }
+
+      .cta-card p {
+        color: rgba(226, 232, 240, 0.75);
+        margin: 0 auto 2rem;
+        max-width: 640px;
+        line-height: 1.7;
+      }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 2.4rem 0;
+        color: rgba(226, 232, 240, 0.6);
+        font-size: 0.9rem;
+      }
+
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 1.5rem;
+        opacity: 0.7;
+      }
+
+      @media (min-width: 768px) {
+        .hero {
+          padding-top: 7rem;
+        }
+
+        .footer-content {
+          flex-direction: row;
+          justify-content: space-between;
+        }
+      }
+    </style>
+
+    <script>
+      (function (w, d, e, u, f, l, n) {
+        w[f] =
+          w[f] ||
+          function () {
+            (w[f].q = w[f].q || []).push(arguments);
+          };
+        l = d.createElement(e);
+        l.async = 1;
+        l.src = u;
+        l.onload = function () {
+          l.setAttribute("data-loaded", "true");
+        };
+        n = d.getElementsByTagName(e)[0];
+        n.parentNode.insertBefore(l, n);
+      })(window, document, "script", "https://assets.mailerlite.com/js/universal.js", "ml");
+      ml("account", "1849787");
+      ml("forms", "169884978531796507", "DRbREV");
+    </script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+          <img src="/src/images/logo.png" alt="Funk My Brand logo" class="logo" />
+          <span class="badge">
+            <span aria-hidden="true">✨</span>
+            Launching Soon
+          </span>
+        </div>
+        <h1>Funk up your brand in minutes</h1>
+        <p>
+          We’re putting the finishing touches on an AI-powered studio that crafts your brand identity, visuals and CVs in record
+          time. Join the waitlist for early access and exclusive launch perks.
+        </p>
+        <button class="waitlist-button" data-ml-action="join" type="button" disabled>
+          Join the waitlist
+        </button>
+        <p class="waitlist-note">A MailerLite pop-up will open. Please allow pop-ups for this site.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="features">
+        <div class="container">
+          <h2>Everything you need</h2>
+          <p>From content ingestion to exports, Funk My Brand handles your entire brand-generation workflow.</p>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="feature-icon">⚡</div>
+              <h3>AI Brand Synthesis</h3>
+              <p>Upload your materials and our AI distills tone, visuals, and story into a cohesive brand identity.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" style="color: #22d3ee; background: rgba(34, 211, 238, 0.12);">🧾</div>
+              <h3>Multiple Formats</h3>
+              <p>UFC announcer, influencer, military precision—pick the presentation style that matches your next move.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" style="color: #f97316; background: rgba(249, 115, 22, 0.12);">🌐</div>
+              <h3>Export &amp; Share</h3>
+              <p>Download polished assets or share instantly with secure links, ready for every platform.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon">👥</div>
+              <h3>Community Gallery</h3>
+              <p>Showcase your brand and explore others from our creator community for inspiration and collaboration.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" style="color: #22d3ee; background: rgba(34, 211, 238, 0.12);">🛡️</div>
+              <h3>Privacy First</h3>
+              <p>Your uploads stay private by default. Decide what to share and when to reveal it.</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-icon" style="color: #facc15; background: rgba(250, 204, 21, 0.12);">✨</div>
+              <h3>Custom Styling</h3>
+              <p>Edit colors, fonts and logo treatments live so every output feels undeniably yours.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="container">
+          <div class="cta-card">
+            <h2>We’re almost ready</h2>
+            <p>
+              Our team is crafting an experience that helps professionals, athletes, creators, and leaders build compelling brand narratives
+              in minutes. Join the waitlist to be the first in line when doors open.
+            </p>
+            <button class="waitlist-button" data-ml-action="join" type="button" disabled>
+              Join the waitlist
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-content">
+        <span>Powered by <strong>Funk My Brand</strong></span>
+        <div class="footer-links" aria-label="Footer links">
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>Contact</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      (function attachMailerLiteHandlers() {
+        const joinButtons = document.querySelectorAll('[data-ml-action="join"]');
+        const triggerPopup = function () {
+          if (typeof window.ml === "function") {
+            window.ml("show", "DRbREV");
+          }
+        };
+
+        const enableButtons = function () {
+          joinButtons.forEach(function (button) {
+            button.removeAttribute("disabled");
+          });
+        };
+
+        joinButtons.forEach(function (button) {
+          button.addEventListener("click", triggerPopup);
+        });
+
+        const mailerLiteScript = document.querySelector('script[src^="https://assets.mailerlite.com/js/universal"]');
+        if (mailerLiteScript) {
+          if (mailerLiteScript.getAttribute("data-loaded") === "true") {
+            enableButtons();
+          } else {
+            mailerLiteScript.addEventListener("load", function () {
+              mailerLiteScript.setAttribute("data-loaded", "true");
+              enableButtons();
+            });
+          }
+        } else {
+          window.addEventListener("load", enableButtons);
+        }
+      })();
+    </script>
+  </body>
+</html>
