@@ -1,0 +1,1 @@
+"C:\Program Files\Git\bin\git.exe" add public/sw.js src/pages/ComingSoon.tsx
