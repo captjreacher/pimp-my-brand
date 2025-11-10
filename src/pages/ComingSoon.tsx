@@ -4,7 +4,7 @@ import { Sparkles, Zap, FileText, Share2, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ComingSoon = () => {
-  const scriptContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const [isFormLoaded, setIsFormLoaded] = React.useState(false);
 
   React.useEffect(() => {
     if (typeof window === "undefined") {
@@ -12,37 +12,47 @@ const ComingSoon = () => {
     }
 
     const existingScript = document.getElementById("mailerlite-universal-script");
-    const container = scriptContainerRef.current;
 
     if (existingScript) {
+      // Script already loaded, just initialize if needed
       type MailerLiteFunction = (...args: unknown[]) => void;
       const { ml } = window as typeof window & { ml?: MailerLiteFunction };
       if (typeof ml === "function") {
         ml("account", "1849787");
+        setIsFormLoaded(true);
       }
       return;
     }
 
-    if (!container) {
-      return;
-    }
-
-    const commentStart = document.createComment(" MailerLite Universal ");
-    const commentEnd = document.createComment(" End MailerLite Universal ");
+    // Load MailerLite universal script
     const script = document.createElement("script");
     script.id = "mailerlite-universal-script";
-    script.innerHTML = `
-    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-    ml('account', '1849787');
-    `;
+    script.src = "https://assets.mailerlite.com/js/universal.js";
+    script.async = true;
 
-    container.appendChild(commentStart);
-    container.appendChild(script);
-    container.appendChild(commentEnd);
+    script.onload = () => {
+      // Initialize MailerLite account
+      type MailerLiteFunction = (...args: unknown[]) => void;
+      const { ml } = window as typeof window & { ml?: MailerLiteFunction };
+      if (typeof ml === "function") {
+        ml("account", "1849787");
+        setIsFormLoaded(true);
+      }
+    };
+
+    document.head.appendChild(script);
   }, []);
+
+  const openMailerLiteForm = () => {
+    if (typeof window !== "undefined" && isFormLoaded) {
+      type MailerLiteFunction = (...args: unknown[]) => void;
+      const { ml } = window as typeof window & { ml?: MailerLiteFunction };
+      if (typeof ml === "function") {
+        // Try to show a popup form - you may need to replace with your actual form ID
+        ml('show', 'popup-form-id');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background" style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}>
@@ -68,7 +78,16 @@ const ComingSoon = () => {
             </p>
 
             {/* Waitlist form */}
-            <div className="mx-auto max-w-xl" ref={scriptContainerRef} />
+            <div className="mx-auto max-w-xl">
+              <Button
+                onClick={openMailerLiteForm}
+                disabled={!isFormLoaded}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl"
+              >
+                {isFormLoaded ? "Join Waitlist" : "Loading..."}
+              </Button>
+            </div>
           </div>
         </div>
       </section>
