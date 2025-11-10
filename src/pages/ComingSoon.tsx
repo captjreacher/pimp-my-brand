@@ -2,56 +2,52 @@ import React from "react";
 import logo from "@/images/logo.png";
 import { Sparkles, Zap, FileText, Share2, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const ComingSoon = () => {
   const [isFormLoaded, setIsFormLoaded] = React.useState(false);
+  const formContainerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
+    const container = formContainerRef.current;
+    if (container) {
+      initializeMailerLiteForm(container);
     }
-
-    const existingScript = document.getElementById("mailerlite-universal-script");
-
-    if (existingScript) {
-      // Script already loaded, just initialize if needed
-      type MailerLiteFunction = (...args: unknown[]) => void;
-      const { ml } = window as typeof window & { ml?: MailerLiteFunction };
-      if (typeof ml === "function") {
-        ml("account", "1849787");
-        setIsFormLoaded(true);
-      }
-      return;
-    }
-
-    // Load MailerLite universal script
-    const script = document.createElement("script");
-    script.id = "mailerlite-universal-script";
-    script.src = "https://assets.mailerlite.com/js/universal.js";
-    script.async = true;
-
-    script.onload = () => {
-      // Initialize MailerLite account
-      type MailerLiteFunction = (...args: unknown[]) => void;
-      const { ml } = window as typeof window & { ml?: MailerLiteFunction };
-      if (typeof ml === "function") {
-        ml("account", "1849787");
-        setIsFormLoaded(true);
-      }
-    };
-
-    document.head.appendChild(script);
   }, []);
 
-  const openMailerLiteForm = () => {
-    if (typeof window !== "undefined" && isFormLoaded) {
-      type MailerLiteFunction = (...args: unknown[]) => void;
-      const { ml } = window as typeof window & { ml?: MailerLiteFunction };
-      if (typeof ml === "function") {
-        // Try to show a popup form - you may need to replace with your actual form ID
-        ml('show', 'popup-form-id');
-      }
-    }
+  const initializeMailerLiteForm = (container: HTMLDivElement) => {
+    // Clear any existing content
+    container.innerHTML = '';
+
+    // Create a simple HTML form that posts to MailerLite
+    const form = document.createElement("form");
+    form.action = "https://assets.mailerlite.com/jsonp/1849787/forms/YOUR_FORM_ID/subscribe"; // Replace YOUR_FORM_ID
+    form.method = "post";
+    form.className = "space-y-4";
+
+    form.innerHTML = `
+      <div>
+        <input
+          type="email"
+          name="fields[email]"
+          placeholder="Enter your email"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
+      >
+        Join Waitlist
+      </button>
+      <p class="text-xs text-muted-foreground text-center">
+        We respect your privacy. Unsubscribe at any time.
+      </p>
+    `;
+
+    container.appendChild(form);
+    setIsFormLoaded(true);
   };
 
   return (
@@ -79,14 +75,25 @@ const ComingSoon = () => {
 
             {/* Waitlist form */}
             <div className="mx-auto max-w-xl">
-              <Button
-                onClick={openMailerLiteForm}
-                disabled={!isFormLoaded}
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl"
-              >
-                {isFormLoaded ? "Join Waitlist" : "Loading..."}
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-2xl"
+                  >
+                    Join Waitlist
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Join Our Waitlist</h3>
+                    <p className="text-muted-foreground">Get early access to Funk My Brand</p>
+                  </div>
+                  <div ref={formContainerRef} className="min-h-[200px] flex items-center justify-center">
+                    {!isFormLoaded && <div className="text-muted-foreground">Loading form...</div>}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
