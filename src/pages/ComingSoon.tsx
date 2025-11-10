@@ -45,7 +45,7 @@ const ComingSoon = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="gradient-hero absolute inset-0" />
@@ -59,7 +59,7 @@ const ComingSoon = () => {
               </div>
             </div>
 
-            <h1 className="font-heading text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="font-heading text-5xl lg:text-7xl font-bold mb-6 leading-tight" style={{ color: '#ffffff', fontSize: '3rem' }}>
               Funk up your brand in minutes
             </h1>
 
