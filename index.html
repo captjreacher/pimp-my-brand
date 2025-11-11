@@ -32,40 +32,7 @@
     </script>
     <!-- End MailerLite Universal -->
 
-    <script>
-      (function () {
-        try {
-          var host = window.location.hostname;
-          var path = window.location.pathname;
-          var shouldRedirect = (host === "funkmybrand.com" || host === "www.funkmybrand.com") && (path === "/" || path === "/index.html");
-          if (shouldRedirect) {
-            var search = window.location.search || "";
-            var hash = window.location.hash || "";
-            window.location.replace("/coming-home" + search + hash);
-          }
-        } catch (error) {
-          console.error("Homepage redirect failed", error);
-        }
-      })();
-    </script>
-
-    <!-- Lightweight redirect to the Coming Soon experience so users avoid a blank initial paint -->
-    <!--
-    <script>
-      (function () {
-        try {
-          var path = window.location.pathname;
-          var search = window.location.search || "";
-          var hash = window.location.hash || "";
-          if (path === "/" || path === "/index.html") {
-            window.location.replace("/coming-soon" + search + hash);
-          }
-        } catch (error) {
-          console.error("Static redirect failed", error);
-        }
-      })();
-    </script>
-    -->
+    
   </head>
 
   <body>

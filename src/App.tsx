@@ -13,6 +13,7 @@ import { useWebVitals } from "./hooks/use-performance";
 import { AdminProvider } from "./contexts/AdminContext";
 
 // Lazy load pages for code splitting
+const Home = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -59,9 +60,9 @@ const App = () => {
         <BrowserRouter>
           <Suspense fallback={<LoadingSkeleton />}>
             <Routes>
-            <Route path="/" element={<Navigate to="/coming-home" replace />} />
-            <Route path="/coming-home" element={<ComingSoon />} />
-            <Route path="/coming-home/" element={<Navigate to="/coming-home" replace />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/coming-home" element={<Navigate to="/" replace />} />
+            <Route path="/coming-home/" element={<Navigate to="/" replace />} />
             <Route path="/coming-soon" element={<ComingSoon />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
