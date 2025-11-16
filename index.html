@@ -32,7 +32,20 @@
     </script>
     <!-- End MailerLite Universal -->
 
-    
+    <!-- GitHub Pages 404 Redirect handler -->
+    <script>
+      (function() {
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath) {
+          sessionStorage.removeItem('redirectPath');
+          // The base path of the app, which is '/' for a custom domain.
+          const basename = '/';
+          const targetUrl = basename + redirectPath.substring(basename.length);
+          window.history.replaceState(null, null, targetUrl);
+        }
+      })();
+    </script>
+    <!-- End GitHub Pages 404 Redirect handler -->
   </head>
 
   <body>

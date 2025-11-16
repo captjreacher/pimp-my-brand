@@ -1,22 +1,16 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
     <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=/" />
     <script>
-      // SPA redirect for GitHub Pages (custom domain root)
-      (function() {
-        var path = window.location.pathname;
-        var base = '/';
-        var clean = path.replace(/^\/+/, '');
-        var newUrl = base + '#' + clean + window.location.search + window.location.hash;
-        window.location.replace(newUrl);
-      })();
+      // Store the full path including search and hash in sessionStorage
+      sessionStorage.setItem('redirectPath', window.location.pathname + window.location.search + window.location.hash);
     </script>
+    <!-- Redirect to the root index.html -->
+    <meta http-equiv="refresh" content="0; url=/">
   </head>
-  <body></body>
-  </html>
-
-
+  <body>
+    <p>If you are not redirected automatically, follow this <a href="/">link to the homepage</a>.</p>
+  </body>
+</html>
