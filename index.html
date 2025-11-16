@@ -36,9 +36,12 @@
     <script>
       (function() {
         const redirectPath = sessionStorage.getItem('redirectPath');
-        if (redirectPath && redirectPath !== window.location.pathname) {
+        if (redirectPath) {
           sessionStorage.removeItem('redirectPath');
-          window.history.replaceState(null, null, redirectPath);
+          // The base path of the app, which is '/' for a custom domain.
+          const basename = '/';
+          const targetUrl = basename + redirectPath.substring(basename.length);
+          window.history.replaceState(null, null, targetUrl);
         }
       })();
     </script>

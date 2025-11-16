@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>Redirecting...</title>
     <script>
-      // Store the full path in sessionStorage
-      sessionStorage.setItem('redirectPath', window.location.pathname);
+      // Store the full path including search and hash in sessionStorage
+      sessionStorage.setItem('redirectPath', window.location.pathname + window.location.search + window.location.hash);
     </script>
     <!-- Redirect to the root index.html -->
     <meta http-equiv="refresh" content="0; url=/">
