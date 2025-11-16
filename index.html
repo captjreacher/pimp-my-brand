@@ -32,7 +32,17 @@
     </script>
     <!-- End MailerLite Universal -->
 
-    
+    <!-- GitHub Pages 404 Redirect handler -->
+    <script>
+      (function() {
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath && redirectPath !== window.location.pathname) {
+          sessionStorage.removeItem('redirectPath');
+          window.history.replaceState(null, null, redirectPath);
+        }
+      })();
+    </script>
+    <!-- End GitHub Pages 404 Redirect handler -->
   </head>
 
   <body>
