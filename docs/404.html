@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+      // Store the full path including search and hash in sessionStorage
+      sessionStorage.setItem('redirectPath', window.location.pathname + window.location.search + window.location.hash);
+    </script>
+    <!-- Redirect to the root index.html -->
+    <meta http-equiv="refresh" content="0; url=/">
+  </head>
+  <body>
+    <p>If you are not redirected automatically, follow this <a href="/">link to the homepage</a>.</p>
+  </body>
+</html>
