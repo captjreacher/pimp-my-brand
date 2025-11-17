@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    outDir: 'docs',
     // Optimize build for better performance
     rollupOptions: {
       output: {

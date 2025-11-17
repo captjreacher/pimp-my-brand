@@ -6,7 +6,6 @@ import { initializePerformanceObserver } from "./lib/performance/bundle-analyzer
 import { useWebVitals } from "./hooks/use-performance";
 
 // Lazy load pages for code splitting
-const Home = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
@@ -46,7 +45,7 @@ const App = () => {
     <BrowserRouter>
       <Suspense fallback={<LoadingSkeleton />}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<ComingSoon />} />
           <Route path="/coming-home" element={<Navigate to="/" replace />} />
           <Route path="/coming-home/" element={<Navigate to="/" replace />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
