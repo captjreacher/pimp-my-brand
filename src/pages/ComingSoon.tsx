@@ -97,7 +97,7 @@ const ComingSoon = () => {
         <div className="relative container mx-auto px-6 py-24 lg:py-32">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex flex-col items-center gap-6 mb-10">
-              <img src={logo} alt="Funk My Brand logo" className="h-20 w-auto rounded-full" />
+              <img src={logo} alt="Funk My Brand logo" className="h-40 w-auto rounded-full" />
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface/60 backdrop-blur-sm border border-border">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm text-muted-foreground">Launching Soon</span>
